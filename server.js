@@ -214,11 +214,28 @@ io.on('connection', (socket) => {
     const resultPayload = { isCorrect, points, attemptsLeft, players: rankedPlayers };
 
     if (everyoneFinished) {
+      // ===== O CÓDIGO FALTANTE ESTÁ A PARTIR DAQUI =====
       const historyObjects = correctOrderObjects.map(t => ({
         number: t.number,
         tip: t.tip,
         playerName: t.player.name
       }));
+
+      const historyHtml = historyObjects.map(t =>
+        `<li data-numero="${t.number}"><b>${t.tip}</b> <i>(Nº ${t.number} por ${t.playerName})</i></li>`
+      ).join('');
+
+      io.emit('roundOver', {
+        historyHtml,
+        historyObjects,
+        players: rankedPlayers,
+        lastPlayerResult: { ...resultPayload, id: player.id }
+      });
+      // ===== FIM DO CÓDIGO FALTANTE =====
+    } else {
+      socket.emit('orderResult', resultPayload);
+    }
+  });
 
       const historyHtml = historyObjects.map(t =>
         `<li data-numero="${t.number}"><b>${t.tip}</b> <i>(Nº ${t.number} por ${t.playerName})</i></li>`
@@ -250,4 +267,5 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
 });
+
 
