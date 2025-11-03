@@ -188,13 +188,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // ===== AQUI ESTÁ A FUNÇÃO QUE VOCÊ APAGOU, AGORA DE VOLTA E CORRIGIDA =====
     socket.on('roundOver', (result) => {
         if (!result || !result.players) return;
         ordenacaoSection.classList.add('hidden');
         lastRoundResult = result;
         const lastPlayer = result.lastPlayerResult;
-        
         if (lastPlayer && lastPlayer.id === socket.id) {
             if (lastPlayer.isCorrect) {
                 showMessage('PARABÉNS!', `Você acertou e ganhou ${lastPlayer.points} pontos!`, 'success');
@@ -206,3 +204,4 @@ document.addEventListener('DOMContentLoaded', () => {
             lastRoundResult = null;
         }
     });
+});
