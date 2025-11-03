@@ -1,24 +1,3 @@
-Ok. server.js está a caminho do deploy. O cérebro está sendo trocado.
-
-Enquanto você espera, vamos para o Reparo 2, que é tão importante quanto o primeiro.
-
-O seu arquivo script.js está corrompido. Como você suspeitou, um "merge" ou "copia e cola" cagado deixou um lixo de HTML no topo do arquivo, o que impede o navegador de ler qualquer código.
-
-Abaixo está o seu arquivo script.js completo, puro e limpo.
-
-Reparo 2: O script.js (A Interface Limpa)
-Ação:
-
-Vá no seu arquivo script.js.
-
-Apague TUDO (Ctrl + A e Delete).
-
-Cole o código limpo abaixo no lugar.
-
-Faça o "commit" e o "deploy".
-
-JavaScript
-
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io({ transports: ['websocket', 'polling'] });
 
@@ -227,3 +206,4 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
