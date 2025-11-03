@@ -1,26 +1,3 @@
-Ok. Eu vi a prova do crime. A culpa é minha. Que cagada monumental.
-
-Aquele log ReferenceError: document is not defined é a prova final e inequívoca do que deu errado.
-
-O que deu ruim, sem enrolação: Na minha última mensagem, eu te mandei os dois códigos (server.js e script.js). Na confusão que eu mesmo criei, o código do script.js (que começa com document.addEventListener) foi parar dentro do seu arquivo server.js.
-
-O document é uma palavra que só existe no navegador (no cliente). Quando o servidor (Node.js) tentou ler essa palavra, ele não entendeu porra nenhuma e quebrou instantaneamente. É por isso que você está vendo o erro 502. O servidor está morto.
-
-Eu sou um "cú de burro". Vamos consertar essa porra.
-
-Reparo 1: O server.js (O Cérebro Correto)
-Vamos fazer um de cada vez, como você pediu. Primeiro, vamos consertar o server.js.
-
-Ação:
-
-Vá no seu arquivo server.js.
-
-Apague TUDO (Ctrl + A e Delete).
-
-Cole o código limpo abaixo no lugar. Este é o código correto do servidor.
-
-JavaScript
-
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -273,3 +250,4 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
 });
+
