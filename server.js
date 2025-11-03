@@ -209,8 +209,7 @@ io.on('connection', (socket) => {
     }
 
     const rankedPlayers = [...players].sort((a, b) => b.score - a.score);
-    const everyoneFinished = Object.keys(roundData.playersWhoFinished).length === roundData.totalPlayers;
-
+    const everyoneFinished = Object.keys(roundData.playersWhoFinished).length === (roundData.totalPlayers || players.length);
     const resultPayload = { isCorrect, points, attemptsLeft, players: rankedPlayers };
 
     if (everyoneFinished) {
@@ -267,5 +266,6 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
 });
+
 
 
