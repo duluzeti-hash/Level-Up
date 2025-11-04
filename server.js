@@ -1,3 +1,4 @@
+// (arquivo completo como proposto anteriormente)
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -18,6 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 let players = [];
 let currentTips = [];
 let roundData = {};
+let matchData = { rounds: [], cumulativeScores: {} };
 
 const temas = [
     { categoria: "CUSTOS OPERACIONAIS", tema: "Analisar o impacto da variação do preço do diesel nos custos logísticos" },
@@ -89,7 +91,6 @@ const temas = [
     { categoria: "PLANEJAMENTO", tema: "Antecipar demandas de transporte em períodos sazonais" },
     { categoria: "PLANEJAMENTO", tema: "Dimensionar equipes conforme o volume de entregas" },
     { categoria: "PLANEJAMENTO", tema: "Planejar investimentos logísticos de longo prazo" },
-    { categoria: "PLANEJAMENTO", tema: "Estabelecer prioridades operacionais diárias" },
     { categoria: "QUALIDADE", tema: "Padronizar processos de carregamento e descarga" },
     { categoria: "QUALIDADE", tema: "Monitorar indicadores de não conformidade" },
     { categoria: "QUALIDADE", tema: "Auditar fornecedores de transporte terceirizado" },
@@ -127,7 +128,8 @@ function resetRoundState(total = null) {
   roundData = {
     playerAttempts: {},
     playersWhoFinished: {},
-    totalPlayers: total
+    totalPlayers: total,
+    roundScores: {}
   };
 }
 
@@ -138,6 +140,8 @@ io.on('connection', (socket) => {
     if (players.length < 8 && !players.some(p => p.id === socket.id)) {
       const newPlayer = { id: socket.id, name, score: 0 };
       players.push(newPlayer);
+      // iniciando entrada do player no cumulativo
+      matchData.cumulativeScores[newPlayer.id] = matchData.cumulativeScores[newPlayer.id] || 0;
       io.emit('updatePlayers', players);
     }
   });
@@ -145,11 +149,17 @@ io.on('connection', (socket) => {
   socket.on('resetPlayers', () => {
     players = [];
     resetRoundState();
+    matchData = { rounds: [], cumulativeScores: {} };
     io.emit('resetGame');
   });
 
   socket.on('startGame', (data) => {
     resetRoundState(players.length);
+    // garante cumulativo inicial para todos os players conectados
+    players.forEach(p => {
+      matchData.cumulativeScores[p.id] = matchData.cumulativeScores[p.id] || p.score || 0;
+    });
+
     const gameInfo = (data.tema === 'aleatorio')
       ? temas[Math.floor(Math.random() * temas.length)]
       : { categoria: data.categoria, tema: data.tema };
@@ -202,6 +212,13 @@ io.on('connection', (socket) => {
       else if (attemptsLeft === 1) points = 20;
       else if (attemptsLeft === 0) points = 10;
       player.score += points;
+      // guarda pontos da rodada para esse player
+      roundData.roundScores[player.id] = (roundData.roundScores[player.id] || 0) + points;
+    } else {
+      // marca 0 ponto se errou e esgotou tentativas (ou manter omisso)
+      if (attemptsLeft === 0) {
+        roundData.roundScores[player.id] = roundData.roundScores[player.id] || 0;
+      }
     }
 
     if (isCorrect || attemptsLeft === 0) {
@@ -210,9 +227,7 @@ io.on('connection', (socket) => {
 
     const rankedPlayers = [...players].sort((a, b) => b.score - a.score);
     
-    // ===== O ERRO ESTAVA AQUI (parêntese faltando) =====
     const everyoneFinished = Object.keys(roundData.playersWhoFinished).length === (roundData.totalPlayers || players.length);
-    // ===== FIM DA CORREÇÃO =====
 
     const resultPayload = { isCorrect, points, attemptsLeft, players: rankedPlayers };
 
@@ -227,15 +242,44 @@ io.on('connection', (socket) => {
         `<li data-numero="${t.number}"><b>${t.tip}</b> <i>(Nº ${t.number} por ${t.playerName})</i></li>`
       ).join('');
 
+      // preparar resumo da rodada
+      const roundNumber = matchData.rounds.length + 1;
+      const roundResult = {
+        roundNumber,
+        historyObjects,
+        roundScores: { ...roundData.roundScores },
+        playersSnapshot: rankedPlayers.map(p => ({ id: p.id, name: p.name, score: p.score }))
+      };
+
+      // atualizar cumulativo por id
+      Object.keys(roundData.roundScores).forEach(pid => {
+        matchData.cumulativeScores[pid] = (matchData.cumulativeScores[pid] || 0) + roundData.roundScores[pid];
+      });
+
+      matchData.rounds.push(roundResult);
+
       io.emit('roundOver', {
         historyHtml,
         historyObjects,
         players: rankedPlayers,
-        lastPlayerResult: { ...resultPayload, id: player.id }
+        lastPlayerResult: { ...resultPayload, id: player.id },
+        roundNumber,
+        roundScores: roundData.roundScores,
+        matchRoundsCount: matchData.rounds.length
       });
     } else {
       socket.emit('orderResult', resultPayload);
     }
+  });
+
+  // novo evento: finalizar partida e enviar histórico completo
+  socket.on('endMatch', () => {
+    const finalRanking = [...players].sort((a, b) => b.score - a.score);
+    io.emit('matchOver', {
+      rounds: matchData.rounds,
+      finalRanking: finalRanking.map(p => ({ id: p.id, name: p.name, score: p.score })),
+      cumulativeScores: matchData.cumulativeScores
+    });
   });
 
   socket.on('disconnect', () => {
@@ -245,6 +289,8 @@ io.on('connection', (socket) => {
         if (roundData.totalPlayers) {
             roundData.totalPlayers = Math.max(0, roundData.totalPlayers - 1);
         }
+        // remove do cumulativo também
+        delete matchData.cumulativeScores[socket.id];
         io.emit('updatePlayers', players);
     }
   });
