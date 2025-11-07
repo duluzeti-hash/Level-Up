@@ -34,7 +34,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const mensagemTexto = document.getElementById('mensagem-texto');
     const btnFecharMensagem = document.getElementById('btn-fechar-mensagem');
     const musica = document.getElementById('musica');
-    
+
+    // Novos elementos adicionados
+    const endMatchBtn = document.getElementById('endMatchBtn');
+    const newRoundBtn = document.getElementById('newRoundBtn');
+    const roundAnswersUl = document.getElementById('roundAnswers');
+    const roundScoreboardUl = document.getElementById('roundScoreboard');
+    const finalRankingUl = document.getElementById('finalRanking');
+
     let currentSecretNumber = 0;
     let sortable;
     let lastRoundResult = null;
@@ -121,6 +128,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Handlers adicionais para botões pós-rodada
+    if (endMatchBtn) {
+        endMatchBtn.addEventListener('click', () => {
+            socket.emit('endMatch');
+        });
+    }
+
+    if (newRoundBtn) {
+        newRoundBtn.addEventListener('click', () => {
+            socket.emit('startGame', { tema: 'aleatorio' });
+            if (newRoundBtn) newRoundBtn.classList.add('hidden');
+            if (endMatchBtn) endMatchBtn.classList.add('hidden');
+            if (roundAnswersUl) roundAnswersUl.innerHTML = '';
+            if (roundScoreboardUl) roundScoreboardUl.innerHTML = '';
+        });
+    }
+
     socket.on('updatePlayers', updatePlayerList);
     socket.on('resetGame', () => window.location.reload());
 
@@ -190,8 +214,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('roundOver', (result) => {
         if (!result || !result.players) return;
+
+        // esconder seção de ordenação e preparar área de resultados
         ordenacaoSection.classList.add('hidden');
         lastRoundResult = result;
+
+        // Renderizar gabarito (historyObjects) com segurança
+        if (roundAnswersUl) {
+            if (result.historyObjects && Array.isArray(result.historyObjects)) {
+                roundAnswersUl.innerHTML = result.historyObjects
+                    .map(h => `<li data-numero="${h.number}"><b>(${h.number})</b> ${escapeHtml(h.tip)} <i>por ${escapeHtml(h.playerName)}</i></li>`)
+                    .join('');
+            } else if (result.historyHtml) {
+                roundAnswersUl.innerHTML = result.historyHtml;
+            } else {
+                roundAnswersUl.innerHTML = '<li>Nenhum histórico da rodada.</li>';
+            }
+        }
+
+        // Renderizar placar da rodada / ranking atual
+        if (roundScoreboardUl && result.players) {
+            roundScoreboardUl.innerHTML = result.players.map(p => {
+                const roundPts = (result.roundScores && result.roundScores[p.id]) ? ` (+${result.roundScores[p.id]} na rodada)` : '';
+                return `<li>${escapeHtml(p.name)} — ${p.score}${roundPts}</li>`;
+            }).join('');
+        }
+
+        // Mostrar a área de resultados e os botões
+        const resultsContainer = document.getElementById('round-results');
+        if (resultsContainer) resultsContainer.classList.remove('hidden');
+        if (newRoundBtn) newRoundBtn.classList.remove('hidden');
+        if (endMatchBtn) endMatchBtn.classList.remove('hidden');
+
+        // Exibir mensagem ao jogador que finalizou sua tentativa
         const lastPlayer = result.lastPlayerResult;
         if (lastPlayer && lastPlayer.id === socket.id) {
             if (lastPlayer.isCorrect) {
@@ -200,8 +255,39 @@ document.addEventListener('DOMContentLoaded', () => {
                 showMessage('FIM DAS TENTATIVAS!', 'Você não acertou.', 'error');
             }
         } else {
+            // Para jogadores que não foram o último a finalizar, mostrar histórico diretamente
             mostrarHistorico(result);
             lastRoundResult = null;
         }
     });
+
+    // Recebe o fim da partida com histórico completo
+    socket.on('matchOver', (data) => {
+        // Mostra ranking final
+        const matchResultsContainer = document.getElementById('match-results');
+        if (matchResultsContainer) matchResultsContainer.classList.remove('hidden');
+
+        if (finalRankingUl && data && data.finalRanking) {
+            finalRankingUl.innerHTML = data.finalRanking
+                .map((r, idx) => `<li>${idx + 1}. ${escapeHtml(r.name)} — ${r.score}</li>`)
+                .join('');
+        }
+
+        // Esconder botões pós-rodada
+        if (newRoundBtn) newRoundBtn.classList.add('hidden');
+        if (endMatchBtn) endMatchBtn.classList.add('hidden');
+
+        showMessage('PARTIDA ENCERRADA', 'O ranking final foi exibido.', 'success');
+    });
+
+    // util: escapar HTML para evitar XSS ao inserir strings vindas do servidor
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 });
