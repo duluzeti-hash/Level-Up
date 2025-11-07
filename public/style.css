@@ -26,10 +26,14 @@ body {
 header {
     text-align: center;
     margin-bottom: 25px;
-    position: relative;
-    padding: 10px; /* Um pouco de respiro interno */
-}
+    position: relative; 
+    padding: 10px;
 
+    /* --- CORREÇÃO FLEXBOX --- */
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+}
 header h1 {
     font-family: 'Lobster', cursive;
     font-size: 3.5rem;
@@ -73,13 +77,32 @@ header h2 {
 
 /* MEDIA QUERY: Apenas em telas maiores que 768px (Tablets/PCs) a foto vai para o canto */
 @media (min-width: 768px) {
-    #foto-adilson-container {
-        position: absolute; /* Volta a flutuar */
-        top: 10px;          /* Ajuste fino da altura */
-        right: 0px;         /* Cola no canto direito do header */
-        margin: 0;
-    }
+
+    /* Regra da foto */
+    #foto-adilson-container {
+        position: absolute;
+        top: 10px;
+        right: 0px;
+        margin: 0;
+    }
+
+    /* Regras novas AGORA DENTRO DO SELETOR 'header' */
+    header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: flex-start;
+        text-align: left; 
+    }
+
+    /* Regras novas para os títulos */
+    header h1, header h2 {
+        text-align: left; 
+        margin-left: 0; 
+        margin-right: 0;
+        max-width: none; 
+    }
 }
+
 
 #cadastro-jogadores, #jogo, #painel-tema-manual {
     margin-top: 20px;
@@ -473,3 +496,4 @@ button:disabled {
     text-align: center; /* Centraliza os botões */
     margin-top: 20px;
 }
+
