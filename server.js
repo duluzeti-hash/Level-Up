@@ -1,4 +1,3 @@
-// (arquivo completo como proposto anteriormente)
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -21,6 +20,8 @@ let currentTips = [];
 let roundData = {};
 let matchData = { rounds: [], cumulativeScores: {} };
 
+// A lista de temas (gigante) não mudou, então eu a omiti daqui para facilitar a leitura.
+// No seu arquivo final, ela deve estar aqui.
 const temas = [
     { categoria: "CUSTOS OPERACIONAIS", tema: "Analisar o impacto da variação do preço do diesel nos custos logísticos" },
     { categoria: "CUSTOS OPERACIONAIS", tema: "Comparar resultados entre manutenção preventiva e corretiva" },
@@ -133,16 +134,68 @@ function resetRoundState(total = null) {
   };
 }
 
+// =======================================================
+// === NOVAS FUNÇÕES DE HELPER PARA O MONITORAMENTO ===
+// =======================================================
+
+/**
+ * Envia o status atual e uma mensagem de log para o monitor.
+ * @param {string} statusTexto - O status principal (ex: "Aguardando Jogadores")
+ * @param {string} [logMsg] - (Opcional) A mensagem para o log de eventos.
+ */
+function broadcastMonitor(statusTexto, logMsg) {
+  io.emit('atualiza-status-jogo', statusTexto);
+  if (logMsg) {
+    io.emit('log-evento', logMsg);
+  }
+}
+
+/**
+ * Envia a lista de jogadores e a pontuação formatada para o monitor.
+ * (O 'monitor.html' ouve 'atualiza-jogadores' e 'atualiza-pontuacao').
+ */
+function updateMonitor() {
+  const rankedPlayers = [...players].sort((a, b) => b.score - a.score);
+  
+  // Envia a lista de jogadores (para o box "Jogadores Conectados")
+  // Usamos o objeto de jogador que você já tem.
+  io.emit('atualiza-jogadores', rankedPlayers.map(p => ({
+      ...p,
+      equipe: (players.indexOf(p) % 2) + 1, // Apenas um exemplo de equipe, já que não temos
+      conectado: true 
+  })));
+
+  // Envia a pontuação (para o box "Pontuação")
+  // O monitor espera um formato { equipe: 'Nome', pontos: X }
+  io.emit('atualiza-pontuacao', rankedPlayers.map(p => ({
+      equipe: p.name, // Usando o nome do jogador como "equipe"
+      pontos: p.score
+  })));
+}
+
+// =======================================================
+// === LÓGICA PRINCIPAL DO JOGO (COM MONITORAMENTO) ===
+// =======================================================
+
 io.on('connection', (socket) => {
+  // Envia o estado atual para o jogador que acabou de conectar
   socket.emit('updatePlayers', players);
+
+  // Envia o estado atual para TODOS os monitores
+  updateMonitor();
+  broadcastMonitor('Aguardando Jogadores');
 
   socket.on('addPlayer', ({ name }) => {
     if (players.length < 8 && !players.some(p => p.id === socket.id)) {
       const newPlayer = { id: socket.id, name, score: 0 };
       players.push(newPlayer);
-      // iniciando entrada do player no cumulativo
       matchData.cumulativeScores[newPlayer.id] = matchData.cumulativeScores[newPlayer.id] || 0;
-      io.emit('updatePlayers', players);
+      
+      io.emit('updatePlayers', players); // Para o jogo
+      
+      // Para o monitor
+      updateMonitor(); 
+      broadcastMonitor('Aguardando Jogadores', `Jogador ${newPlayer.name} entrou na sala.`);
     }
   });
 
@@ -150,12 +203,14 @@ io.on('connection', (socket) => {
     players = [];
     resetRoundState();
     matchData = { rounds: [], cumulativeScores: {} };
-    io.emit('resetGame');
+    io.emit('resetGame'); // Para o jogo
+    
+    // Para o monitor
+    broadcastMonitor('Jogo Resetado', 'O jogo foi reiniciado pelo anfitrião.');
   });
 
   socket.on('startGame', (data) => {
     resetRoundState(players.length);
-    // garante cumulativo inicial para todos os players conectados
     players.forEach(p => {
       matchData.cumulativeScores[p.id] = matchData.cumulativeScores[p.id] || p.score || 0;
     });
@@ -163,15 +218,32 @@ io.on('connection', (socket) => {
     const gameInfo = (data.tema === 'aleatorio')
       ? temas[Math.floor(Math.random() * temas.length)]
       : { categoria: data.categoria, tema: data.tema };
-    io.emit('gameStarted', gameInfo);
+    
+    io.emit('gameStarted', gameInfo); // Para o jogo
+    
+    // Para o monitor
+    const roundNumber = matchData.rounds.length + 1;
+    io.emit('atualiza-rodada', { numero: roundNumber, tema: gameInfo.tema });
+    broadcastMonitor(`Rodada ${roundNumber} Iniciada`, `Tema: ${gameInfo.tema}`);
   });
 
   socket.on('requestNextTipper', () => {
     if (currentTips.length < players.length) {
-      io.emit('nextTipper', players[currentTips.length]);
+      const player = players[currentTips.length];
+      io.emit('nextTipper', player); // Para o jogo
+      
+      // Para o monitor
+      io.emit('atualiza-jogador-da-vez', player.name);
+      io.emit('atualiza-cronometro', '--:--'); // Sem timer
+      broadcastMonitor(`Aguardando Dica`, `É a vez de ${player.name} dar a dica.`);
+
     } else {
       const shuffledTips = [...currentTips].sort(() => Math.random() - 0.5).map(t => t.tip);
-      io.emit('startSortingPhase', shuffledTips);
+      io.emit('startSortingPhase', shuffledTips); // Para o jogo
+      
+      // Para o monitor
+      io.emit('atualiza-jogador-da-vez', 'Ninguém');
+      broadcastMonitor('Fase de Ordenação', 'Todas as dicas foram dadas. Iniciando ordenação.');
     }
   });
 
@@ -181,11 +253,25 @@ io.on('connection', (socket) => {
       const number = tipData.number; 
       currentTips.push({ ...tipData, number, player: { id: socket.id, name: player.name } });
 
+      // Para o monitor (enviando a dica nova)
+      io.emit('nova-dica', { jogador: player.name, texto: tipData.tip });
+      broadcastMonitor('Dica Recebida', `Dica ${currentTips.length}/${players.length} recebida de ${player.name}.`);
+
+      // Lógica do jogo (continua)
       if (currentTips.length < players.length) {
         io.emit('nextTipper', players[currentTips.length]);
+        // Atualiza o monitor para o próximo jogador
+        const nextPlayer = players[currentTips.length];
+        io.emit('atualiza-jogador-da-vez', nextPlayer.name);
+        io.emit('atualiza-cronometro', '--:--');
+        broadcastMonitor(`Aguardando Dica`, `É a vez de ${nextPlayer.name} dar a dica.`);
+
       } else {
         const shuffledTips = [...currentTips].sort(() => Math.random() - 0.5).map(t => t.tip);
-        io.emit('startSortingPhase', shuffledTips);
+        io.emit('startSortingPhase', shuffledTips); // Para o jogo
+        // Atualiza o monitor
+        io.emit('atualiza-jogador-da-vez', 'Ninguém');
+        broadcastMonitor('Fase de Ordenação', 'Todas as dicas foram dadas. Iniciando ordenação.');
       }
     }
   });
@@ -212,12 +298,19 @@ io.on('connection', (socket) => {
       else if (attemptsLeft === 1) points = 20;
       else if (attemptsLeft === 0) points = 10;
       player.score += points;
-      // guarda pontos da rodada para esse player
       roundData.roundScores[player.id] = (roundData.roundScores[player.id] || 0) + points;
+      
+      // Para o monitor
+      broadcastMonitor('Ordenação em Andamento', `${player.name} ACERTOU a ordem e ganhou ${points} pontos.`);
+
     } else {
-      // marca 0 ponto se errou e esgotou tentativas (ou manter omisso)
       if (attemptsLeft === 0) {
         roundData.roundScores[player.id] = roundData.roundScores[player.id] || 0;
+        // Para o monitor
+        broadcastMonitor('Ordenação em Andamento', `${player.name} esgotou as tentativas.`);
+      } else {
+        // Para o monitor
+        broadcastMonitor('Ordenação em Andamento', `${player.name} errou. ${attemptsLeft} tentativas restantes.`);
       }
     }
 
@@ -227,8 +320,10 @@ io.on('connection', (socket) => {
 
     const rankedPlayers = [...players].sort((a, b) => b.score - a.score);
     
+    // Atualiza o monitor com os novos scores
+    updateMonitor();
+    
     const everyoneFinished = Object.keys(roundData.playersWhoFinished).length === (roundData.totalPlayers || players.length);
-
     const resultPayload = { isCorrect, points, attemptsLeft, players: rankedPlayers };
 
     if (everyoneFinished) {
@@ -242,7 +337,6 @@ io.on('connection', (socket) => {
         `<li data-numero="${t.number}"><b>${t.tip}</b> <i>(Nº ${t.number} por ${t.playerName})</i></li>`
       ).join('');
 
-      // preparar resumo da rodada
       const roundNumber = matchData.rounds.length + 1;
       const roundResult = {
         roundNumber,
@@ -251,14 +345,13 @@ io.on('connection', (socket) => {
         playersSnapshot: rankedPlayers.map(p => ({ id: p.id, name: p.name, score: p.score }))
       };
 
-      // atualizar cumulativo por id
       Object.keys(roundData.roundScores).forEach(pid => {
         matchData.cumulativeScores[pid] = (matchData.cumulativeScores[pid] || 0) + roundData.roundScores[pid];
       });
 
       matchData.rounds.push(roundResult);
 
-      io.emit('roundOver', {
+      io.emit('roundOver', { // Para o jogo
         historyHtml,
         historyObjects,
         players: rankedPlayers,
@@ -267,35 +360,47 @@ io.on('connection', (socket) => {
         roundScores: roundData.roundScores,
         matchRoundsCount: matchData.rounds.length
       });
+      
+      // Para o monitor
+      broadcastMonitor('Fim da Rodada', `Rodada ${roundNumber} finalizada.`);
+
     } else {
-      socket.emit('orderResult', resultPayload);
+      socket.emit('orderResult', resultPayload); // Para o jogo
     }
   });
 
-  // novo evento: finalizar partida e enviar histórico completo
   socket.on('endMatch', () => {
     const finalRanking = [...players].sort((a, b) => b.score - a.score);
-    io.emit('matchOver', {
+    io.emit('matchOver', { // Para o jogo
       rounds: matchData.rounds,
       finalRanking: finalRanking.map(p => ({ id: p.id, name: p.name, score: p.score })),
       cumulativeScores: matchData.cumulativeScores
     });
+
+    // Para o monitor
+    broadcastMonitor('Fim de Jogo', 'Partida finalizada. Exibindo ranking final.');
   });
 
   socket.on('disconnect', () => {
     const playerIndex = players.findIndex(p => p.id === socket.id);
     if (playerIndex > -1) {
+        const playerName = players[playerIndex].name;
         players.splice(playerIndex, 1);
         if (roundData.totalPlayers) {
             roundData.totalPlayers = Math.max(0, roundData.totalPlayers - 1);
         }
-        // remove do cumulativo também
         delete matchData.cumulativeScores[socket.id];
-        io.emit('updatePlayers', players);
+        
+        io.emit('updatePlayers', players); // Para o jogo
+
+        // Para o monitor
+        updateMonitor();
+        broadcastMonitor('Jogador Desconectado', `${playerName} saiu da sala.`);
     }
   });
 });
 
 server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
+  broadcastMonitor('Servidor Iniciado', 'Servidor online e aguardando conexões.');
 });
