@@ -41,7 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const roundAnswersUl = document.getElementById('roundAnswers');
     const roundScoreboardUl = document.getElementById('roundScoreboard');
     const finalRankingUl = document.getElementById('finalRanking');
-
+    const btnVoltarInicio = document.getElementById('btn-voltar-inicio');
+    
     let currentSecretNumber = 0;
     let sortable;
     let lastRoundResult = null;
@@ -144,7 +145,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (roundScoreboardUl) roundScoreboardUl.innerHTML = '';
         });
     }
-
+    if (btnVoltarInicio) {
+        btnVoltarInicio.addEventListener('click', () => {
+            // Reutiliza a função de resetar o jogo que você já tem
+            socket.emit('resetPlayers'); 
+        });
+    }
     socket.on('updatePlayers', updatePlayerList);
     socket.on('resetGame', () => window.location.reload());
 
@@ -291,3 +297,4 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 });
+
