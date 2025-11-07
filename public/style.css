@@ -1,32 +1,8 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: Arial, sans-serif;
-    background: url('/imagens/fundo-caminhao.jpg') no-repeat center center fixed;
-    background-size: cover;
-    color: #fff;
-    min-height: 100vh;
-    padding: 20px;
-    font-size: 1.1rem;
-}
-
-#container {
-    background: rgba(0, 0, 0, 0.65);
-    padding: 30px;
-    border-radius: 12px;
-    max-width: 900px;
-    margin: 0 auto;
-    box-shadow: 0 0 15px #000;
-}
-
 header {
     text-align: center;
     margin-bottom: 25px;
     position: relative;
+    padding: 10px; /* Um pouco de respiro interno */
 }
 
 header h1 {
@@ -34,6 +10,7 @@ header h1 {
     font-size: 3.5rem;
     color: #ffa500;
     text-shadow: 1px 1px 4px #000;
+    margin-bottom: 5px; /* Aproxima um pouco do subtítulo */
 }
 
 header h2 {
@@ -42,12 +19,16 @@ header h2 {
     margin-bottom: 15px;
     color: #ffffb3;
     text-shadow: 1px 1px 2px #000;
+    /* Garante que o subtítulo não fique largo demais e bata na foto em telas médias */
+    max-width: 80%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
+/* ESTILO BASE (Mobile First): Foto centralizada abaixo do texto */
 #foto-adilson-container {
-    position: absolute;
-    top: 10px;
-    right: 20px;
+    position: relative; /* Não flutua mais por padrão */
+    margin: 15px auto 0; /* Centraliza e dá espaço acima */
     text-align: center;
     font-size: 0.95rem;
     color: #ddd;
@@ -60,6 +41,19 @@ header h2 {
     border: 3px solid #ffa500;
     object-fit: cover;
     margin-bottom: 5px;
+    display: block;    /* Garante que a margem 'auto' funcione para centralizar */
+    margin-left: auto; /* Centraliza a imagem no container */
+    margin-right: auto;
+}
+
+/* MEDIA QUERY: Apenas em telas maiores que 768px (Tablets/PCs) a foto vai para o canto */
+@media (min-width: 768px) {
+    #foto-adilson-container {
+        position: absolute; /* Volta a flutuar */
+        top: 10px;          /* Ajuste fino da altura */
+        right: 0px;         /* Cola no canto direito do header */
+        margin: 0;
+    }
 }
 
 #cadastro-jogadores, #jogo, #painel-tema-manual {
@@ -454,3 +448,4 @@ button:disabled {
     text-align: center; /* Centraliza os botões */
     margin-top: 20px;
 }
+
