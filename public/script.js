@@ -46,7 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSecretNumber = 0;
     let sortable;
     let lastRoundResult = null;
-
+    let playerCount = 0;
+    
     function showMessage(title, text, type = 'info') {
         mensagemTitulo.textContent = title;
         mensagemTexto.textContent = text;
@@ -59,7 +60,9 @@ document.addEventListener('DOMContentLoaded', () => {
         mensagemCustomizada.classList.remove('hidden');
     }
 
-    function updatePlayerList(playerList) {
+   function updatePlayerList(playerList) {
+        playerCount = playerList.length; // <-- ADICIONADO: Atualiza a contagem global
+
         listaJogadoresDiv.innerHTML = '<h4>Jogadores (Ranking):</h4>';
         playerList.sort((a, b) => b.score - a.score).forEach((player, index) => {
             const div = document.createElement('div');
@@ -69,6 +72,23 @@ document.addEventListener('DOMContentLoaded', () => {
                              <span class="player-score">${player.score} pts</span>`;
             listaJogadoresDiv.appendChild(div);
         });
+        const canStart = playerList.length >= 2;
+        btnIniciarJogo.classList.toggle('hidden', !canStart);
+        painelTemaManual.classList.toggle('hidden', !canStart);
+
+        // ▼▼▼ BLOCO INTEIRO ADICIONADO ABAIXO ▼▼▼
+        // Desabilita a adição se o limite for atingido
+        const limiteAtingido = (playerCount >= 8);
+        btnAddJogador.disabled = limiteAtingido;
+        nomeJogadorInput.disabled = limiteAtingido;
+
+        if (limiteAtingido) {
+            nomeJogadorInput.placeholder = "Limite de 8 jogadores atingido";
+        } else {
+            nomeJogadorInput.placeholder = "Digite o nome do jogador";
+        }
+        // ▲▲▲ FIM DO BLOCO ADICIONADO ▲▲▲
+    }
         const canStart = playerList.length >= 2;
         btnIniciarJogo.classList.toggle('hidden', !canStart);
         painelTemaManual.classList.toggle('hidden', !canStart);
@@ -85,6 +105,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     btnAddJogador.addEventListener('click', () => {
+        // ▼▼▼ BLOCO DE VERIFICAÇÃO ADICIONADO ▼▼▼
+        if (playerCount >= 8) {
+            showMessage('Limite Atingido', 'O jogo suporta no máximo 8 jogadores.', 'error');
+            return; // Impede o envio
+        }
+        // ▲▲▲ FIM DO BLOCO ADICIONADO ▲▲▲
+
         const name = nomeJogadorInput.value.trim();
         if (name) socket.emit('addPlayer', { name });
         nomeJogadorInput.value = '';
@@ -297,4 +324,5 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 });
+
 
