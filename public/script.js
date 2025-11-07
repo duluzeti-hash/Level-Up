@@ -1,4 +1,3 @@
-// V 1.2 tentando de novo
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io({ transports: ['websocket', 'polling'] });
 
@@ -68,9 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playerList.sort((a, b) => b.score - a.score).forEach((player, index) => {
             const div = document.createElement('div');
             div.classList.add('player-item');
-            div.innerHTML = `<span class="player-rank">${index + 1}º</span>
-                             <span class="player-name">${player.name}</span>
-                             <span class="player-score">${player.score} pts</span>`;
+            div.innerHTML = `<span class="player-rank">${index + 1}º</span><br>                             <span class="player-name">${player.name}</span><br>                             <span class="player-score">${player.score} pts</span>`;
             listaJogadoresDiv.appendChild(div);
         });
         const canStart = playerList.length >= 2;
@@ -89,10 +86,6 @@ document.addEventListener('DOMContentLoaded', () => {
             nomeJogadorInput.placeholder = "Digite o nome do jogador";
         }
         // ▲▲▲ FIM DO BLOCO ADICIONADO ▲▲▲
-    }
-        const canStart = playerList.length >= 2;
-        btnIniciarJogo.classList.toggle('hidden', !canStart);
-        painelTemaManual.classList.toggle('hidden', !canStart);
     }
 
     function mostrarHistorico(result) {
@@ -325,7 +318,3 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 });
-
-
-
-
