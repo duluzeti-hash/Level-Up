@@ -69,6 +69,21 @@
             </section>
 
             <button id="btn-proxima-rodada" class="btn-green hidden">Próxima Rodada</button>
+
+            <!-- NOVO: área de resultados e controles pós-rodada -->
+            <div id="round-results" class="hidden">
+                <h4>Gabarito da Rodada</h4>
+                <ul id="roundAnswers"></ul>
+
+                <h4>Placar (ranking atual)</h4>
+                <ul id="roundScoreboard"></ul>
+
+                <div class="post-round-controls">
+                    <button id="newRoundBtn" class="btn-green hidden">Nova Rodada</button>
+                    <button id="endMatchBtn" class="btn-red hidden">Encerrar Partida</button>
+                </div>
+            </div>
+            <!-- FIM: área de resultados -->
         </section>
 
     </div>
@@ -77,6 +92,12 @@
         <h4 id="mensagem-titulo"></h4>
         <p id="mensagem-texto"></p>
         <button id="btn-fechar-mensagem" class="btn-green">OK</button>
+    </div>
+
+    <!-- NOVO: área da partida finalizada -->
+    <div id="match-results" class="hidden">
+        <h4>Ranking Final</h4>
+        <ul id="finalRanking"></ul>
     </div>
 
     <audio id="musica" loop>
