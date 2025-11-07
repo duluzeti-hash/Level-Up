@@ -1,4 +1,4 @@
-// V 1.1 corrigindo bug
+// V 1.2 tentando de novo
 document.addEventListener('DOMContentLoaded', () => {
     const socket = io({ transports: ['websocket', 'polling'] });
 
@@ -325,6 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/'/g, '&#039;');
     }
 });
+
 
 
 
