@@ -71,19 +71,24 @@
             <button id="btn-proxima-rodada" class="btn-green hidden">Próxima Rodada</button>
 
             <!-- NOVO: área de resultados e controles pós-rodada -->
-            <div id="round-results" class="hidden">
-                <h4>Gabarito da Rodada</h4>
-                <ul id="roundAnswers"></ul>
+          <div id="round-results" class="hidden">
 
-                <h4>Placar (ranking atual)</h4>
-                <ul id="roundScoreboard"></ul>
+            <div id="round-results-container">
+                <div id="gabarito-col">
+                    <h4>Gabarito da Rodada</h4>
+                    <ul id="roundAnswers"></ul>
+                </div>
 
-                <div class="post-round-controls">
-                    <button id="newRoundBtn" class="btn-green hidden">Nova Rodada</button>
-                    <button id="endMatchBtn" class="btn-red hidden">Encerrar Partida</button>
+                <div id="placar-col">
+                    <h4>Placar (ranking atual)</h4>
+                    <ul id="roundScoreboard"></ul>
                 </div>
             </div>
-            <!-- FIM: área de resultados -->
+            <div class="post-round-controls">
+                <button id="newRoundBtn" class="btn-green hidden">Nova Rodada</button>
+                <button id="endMatchBtn" class="btn-red hidden">Encerrar Partida</button>
+            </div>
+        </div>
         </section>
 
     </div>
@@ -110,4 +115,5 @@
     <script src="script.js"></script>
 </body>
 </html>
+
 
