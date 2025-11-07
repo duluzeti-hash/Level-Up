@@ -94,18 +94,20 @@
         <button id="btn-fechar-mensagem" class="btn-green">OK</button>
     </div>
 
-    <!-- NOVO: área da partida finalizada -->
-    <div id="match-results" class="hidden">
-        <h4>Ranking Final</h4>
-        <ul id="finalRanking"></ul>
-    </div>
+   <div id="match-results" class="hidden">
+    <h4>Ranking Final</h4>
+    <ul id="finalRanking"></ul>
+    
+    <button id="btn-voltar-inicio" class="btn-green" style="margin-top: 20px;">Voltar ao Início</button>
+</div>
 
-    <audio id="musica" loop>
-        <source src="sons/musica.mp3" type="audio/mpeg" />
-    </audio>
-
+<audio id="musica" loop>
+    <source src="sons/musica.mp3" type="audio/mpeg" />
+</audio>
+    
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
+
