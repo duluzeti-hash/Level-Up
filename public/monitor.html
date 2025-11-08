@@ -4,37 +4,102 @@
 <meta charset="UTF-8">
 <title>Monitoramento do Jogo INDO</title>
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-<link rel="stylesheet" href="style.css">
-<style>
-    /* Estilos base que você forneceu, com alguns ajustes */
-    body { font-family: Arial, sans-serif; background: #f0f0f0; padding: 20px; color: #333; }
-    h1 { color: #ffcc00; /* Cor do logo INDO */ text-align: center; text-shadow: 1px 1px 2px #555; }
-    h2 { margin-top: 10px; border-bottom: 2px solid #ffcc00; padding-bottom: 5px; }
-    ul { list-style: none; padding-left: 0; }
-    li { background: #fff; margin: 5px 0; padding: 8px; border-radius: 5px; }
-    
-    .container { display: flex; gap: 20px; flex-wrap: wrap; }
-    .box { background: #fff; padding: 15px; border-radius: 8px; flex: 1; min-width: 280px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+<link href="https://fonts.googleapis.com/css2?family=Lobster&display=swap" rel="stylesheet" />
 
-    /* Estilo para o Status do Jogo (NOVO) */
-    #status-jogo { font-size: 1.2em; font-weight: bold; color: #007bff; }
+<style>
+    /* --- INÍCIO DOS ESTILOS CORRIGIDOS --- */
+
+    /* Estilos do Jogo Principal (Caminhão e Caixa Escura) */
+    body {
+        font-family: Arial, sans-serif;
+        background: url('/imagens/fundo-caminhao.jpg') no-repeat center center fixed;
+        background-size: cover;
+        color: #fff; /* Texto branco */
+        min-height: 100vh;
+        padding: 20px;
+        font-size: 1.1rem;
+    }
+
+    /* O container principal (caixa escura) */
+    #container {
+        background: rgba(0, 0, 0, 0.65); /* Caixa escura */
+        padding: 30px;
+        border-radius: 12px;
+        max-width: 900px;
+        margin: 0 auto;
+        box-shadow: 0 0 15px #000;
+        
+        /* Layout flexível para os boxes */
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+
+    /* As caixas de informação (agora escuras) */
+    .box {
+        background: rgba(0, 0, 0, 0.3); /* Fundo escuro para os boxes */
+        padding: 15px;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 280px;
+        border: 1px solid rgba(255, 165, 0, 0.5); /* Borda laranja */
+    }
+    
+    /* Título Principal (Monitoramento...) */
+    h1 { 
+        color: #ffa500; /* Laranja do logo */
+        text-align: center; 
+        text-shadow: 1px 1px 4px #000;
+        font-family: 'Lobster', cursive; /* Fonte do logo */
+        font-size: 3.5rem; /* Tamanho do logo */
+        margin-bottom: 20px;
+    }
+    
+    /* Títulos dos boxes (Status do Jogo, Rodada...) */
+    h2 { 
+        margin-top: 10px; 
+        border-bottom: 2px solid #ffa500; /* Laranja */
+        padding-bottom: 5px; 
+        color: #ffffb3; /* Amarelo claro do subtítulo */
+        text-shadow: 1px 1px 2px #000;
+    }
+
+    ul { list-style: none; padding-left: 0; }
+    
+    /* Itens das listas (jogadores, dicas, etc.) */
+    li { 
+        background: rgba(0, 0, 0, 0.5); /* Fundo escuro para itens da lista */
+        margin: 5px 0; 
+        padding: 8px 15px; 
+        border-radius: 5px; 
+        border: 1px solid rgba(255, 165, 0, 0.3);
+    }
+
+    /* Estilos específicos do Monitor */
+    #status-jogo { font-size: 1.2em; font-weight: bold; color: #95ff00; } /* Verde-limão */
     #cronometro { font-size: 1.5em; font-weight: bold; color: #d9534f; }
     
-    /* Estilo para o Log de Eventos (NOVO) */
     #lista-log {
         max-height: 200px;
-        overflow-y: auto; /* Adiciona scroll se o log ficar grande */
+        overflow-y: auto;
         font-size: 0.9em;
-        color: #555;
+        color: #ddd;
     }
-    #lista-log li { background: #f9f9f9; padding: 5px; }
+    #lista-log li { 
+        background: rgba(0, 0, 0, 0.2);
+        padding: 5px; 
+        color: #ddd;
+        border: none;
+        font-size: 0.95em;
+    }
+    /* --- FIM DOS ESTILOS CORRIGIDOS --- */
 </style>
 </head>
 <body>
 
   <h1>Monitoramento em Tempo Real - Jogo INDO</h1>
 
-  <div class="container">
+    <div id="container">
 
     <div class="box" id="status-geral">
         <h2>Status do Jogo</h2>
@@ -45,7 +110,7 @@
       <h2>Rodada Atual</h2>
       <p><strong>Número:</strong> <span id="numero-rodada">0</span></p>
       <p><strong>Tema:</strong> <span id="tema-rodada">Aguardando...</span></p>
-            <p><strong>Jogador da Vez:</strong> <span id="jogador-da-vez">Ninguém</span></p>
+      <p><strong>Jogador da Vez:</strong> <span id="jogador-da-vez">Ninguém</span></p>
       <p><strong>Tempo Restante:</strong> <span id="cronometro">--:--</span></p>
     </div>
 
@@ -57,12 +122,14 @@
 
     <div class="box" id="status-jogadores">
       <h2>Jogadores Conectados</h2>
-      <ul id="lista-jogadores"></ul>
+      <ul id="lista-jogadores">
+          </ul>
     </div>
 
     <div class="box" id="dicas">
       <h2>Dicas da Rodada</h2>
-      <ul id="lista-dicas"></ul>
+      <ul id="lista-dicas">
+          </ul>
     </div>
 
     <div class="box" id="log-eventos">
@@ -91,13 +158,13 @@
 
     // --- Listeners do Socket ---
 
-    // SUGESTÃO: Modifiquei para incluir a equipe do jogador
+    // CORREÇÃO 1: (j.nome -> j.name)
     socket.on("atualiza-jogadores", (jogadores) => {
       elListaJogadores.innerHTML = "";
       jogadores.forEach(j => {
         const li = document.createElement("li");
         // Ex: "Duzão (Equipe 1) - Conectado"
-        li.textContent = `${j.nome} (Equipe ${j.equipe}) ${j.conectado ? "- Conectado" : "- Offline"}`;
+        li.textContent = `${j.name} (Equipe ${j.equipe}) ${j.conectado ? "- Conectado" : "- Offline"}`;
         elListaJogadores.appendChild(li);
       });
     });
@@ -109,15 +176,15 @@
       elListaDicas.innerHTML = ""; 
     });
 
+    // CORREÇÃO 2: (for...in -> forEach)
     socket.on("atualiza-pontuacao", (pontos) => {
       elPlacar.innerHTML = "";
-      // Assumindo que 'pontos' é um objeto como { equipe1: 10, equipe2: 5 }
-      // Se for uma lista (como no seu original), mantenha o seu .forEach
-      for (const equipe in pontos) {
+      // O servidor envia um array de objetos, ex: [{equipe: 'Gege', pontos: 10}]
+      pontos.forEach(p => {
         const li = document.createElement("li");
-        li.textContent = `Equipe ${equipe}: ${pontos[equipe]} pts`;
+        li.textContent = `${p.equipe}: ${p.pontos} pts`;
         elPlacar.appendChild(li);
-      }
+      });
     });
 
     // Modificado para 'nova-dica' para adicionar uma por vez
@@ -130,33 +197,18 @@
 
     // --- Novos Listeners Essenciais ---
 
-    /**
-     * Atualiza o status principal do jogo
-     * (Ex: "Aguardando Jogadores", "Rodada 1 em Andamento", "Fim de Jogo")
-     */
     socket.on("atualiza-status-jogo", (statusTexto) => {
         elStatusJogo.textContent = statusTexto;
     });
 
-    /**
-     * Atualiza o cronômetro em tempo real
-     * (Recebe o tempo formatado, ex: "00:45")
-     */
     socket.on("atualiza-cronometro", (tempo) => {
         elCronometro.textContent = tempo;
     });
 
-    /**
-     * Destaca o jogador que está dando a dica
-     */
     socket.on("atualiza-jogador-da-vez", (jogadorNome) => {
         elJogadorDaVez.textContent = jogadorNome;
     });
 
-    /**
-     * Adiciona um evento ao Log
-     * (Ex: "Equipe 1 acertou a palavra 'Casa'", "Tempo esgotado para Duzão")
-     */
     socket.on("log-evento", (mensagem) => {
         const li = document.createElement("li");
         li.textContent = `[${new Date().toLocaleTimeString()}]: ${mensagem}`;
