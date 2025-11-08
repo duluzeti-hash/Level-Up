@@ -496,4 +496,37 @@ button:disabled {
     text-align: center; /* Centraliza os botões */
     margin-top: 20px;
 }
+/* --- ESTILOS DO CRONÔMETRO DO JOGO --- */
+
+#cronometro-jogo-container {
+    text-align: center;
+    margin: 15px 0;
+}
+
+#cronometro-display {
+    font-size: 4.5rem; /* Gigante! */
+    font-weight: bold;
+    color: #95ff00; /* Verde-limão (cor da pontuação) */
+    text-shadow: 2px 2px 5px #000;
+    transition: color 0.5s ease;
+}
+
+/* Quando o tempo está acabando */
+#cronometro-display.timer-urgente {
+    color: #d9534f; /* Vermelho (cor do btn-red) */
+    animation: pulse-red 1s infinite;
+}
+
+/* Quando o tempo acaba */
+#cronometro-display.timer-acabou {
+    color: #888; /* Cinza */
+    animation: none;
+}
+
+/* Animação de pulsar */
+@keyframes pulse-red {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
 
