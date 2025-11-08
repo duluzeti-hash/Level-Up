@@ -15,13 +15,22 @@ const io = new Server(server, {
 const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 
+// --- NOVAS VARIÁVEIS DO CRONÔMETRO ---
+const TIP_TIME_LIMIT = 60; // Nosso tempo em segundos
+let timerInterval = null; // Variável para controlar o timer
+// ------------------------------------
+
 let players = [];
 let currentTips = [];
 let roundData = {};
 let matchData = { rounds: [], cumulativeScores: {} };
 
-// A lista de temas (gigante) não mudou, então eu a omiti daqui para facilitar a leitura.
-// No seu arquivo final, ela deve estar aqui.
+// --- NOVA FUNÇÃO HELPER: Formatar Tempo ---
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
+}
 const temas = [
     { categoria: "CUSTOS OPERACIONAIS", tema: "Analisar o impacto da variação do preço do diesel nos custos logísticos" },
     { categoria: "CUSTOS OPERACIONAIS", tema: "Comparar resultados entre manutenção preventiva e corretiva" },
@@ -125,6 +134,7 @@ const temas = [
 ];
 
 function resetRoundState(total = null) {
+  if (timerInterval) clearInterval(timerInterval); // Para o timer se o jogo resetar
   currentTips = [];
   roundData = {
     playerAttempts: {},
@@ -135,14 +145,9 @@ function resetRoundState(total = null) {
 }
 
 // =======================================================
-// === NOVAS FUNÇÕES DE HELPER PARA O MONITORAMENTO ===
+// === FUNÇÕES DE HELPER PARA O MONITORAMENTO ===
 // =======================================================
 
-/**
- * Envia o status atual e uma mensagem de log para o monitor.
- * @param {string} statusTexto - O status principal (ex: "Aguardando Jogadores")
- * @param {string} [logMsg] - (Opcional) A mensagem para o log de eventos.
- */
 function broadcastMonitor(statusTexto, logMsg) {
   io.emit('atualiza-status-jogo', statusTexto);
   if (logMsg) {
@@ -150,66 +155,109 @@ function broadcastMonitor(statusTexto, logMsg) {
   }
 }
 
-/**
- * Envia a lista de jogadores e a pontuação formatada para o monitor.
- * (O 'monitor.html' ouve 'atualiza-jogadores' e 'atualiza-pontuacao').
- */
 function updateMonitor() {
   const rankedPlayers = [...players].sort((a, b) => b.score - a.score);
   
-  // Envia a lista de jogadores (para o box "Jogadores Conectados")
-  // Usamos o objeto de jogador que você já tem.
   io.emit('atualiza-jogadores', rankedPlayers.map(p => ({
       ...p,
-      equipe: (players.indexOf(p) % 2) + 1, // Apenas um exemplo de equipe, já que não temos
+      equipe: (players.indexOf(p) % 2) + 1, 
       conectado: true 
   })));
 
-  // Envia a pontuação (para o box "Pontuação")
-  // O monitor espera um formato { equipe: 'Nome', pontos: X }
   io.emit('atualiza-pontuacao', rankedPlayers.map(p => ({
-      equipe: p.name, // Usando o nome do jogador como "equipe"
+      equipe: p.name, 
       pontos: p.score
   })));
 }
+
+// =======================================================
+// === NOVA FUNÇÃO: LÓGICA DO CRONÔMETRO ===
+// =======================================================
+
+function startTipperTimer(player) {
+  if (timerInterval) clearInterval(timerInterval); // Limpa qualquer timer anterior
+
+  let remainingTime = TIP_TIME_LIMIT;
+
+  // Emite o 'nextTipper' para o jogador
+  io.emit('nextTipper', player); 
+  
+  // Emite o tempo inicial para todos (jogo e monitor)
+  io.emit('atualiza-cronometro', formatTime(remainingTime));
+  
+  // Atualiza o monitor
+  io.emit('atualiza-jogador-da-vez', player.name);
+  broadcastMonitor(`Aguardando Dica`, `É a vez de ${player.name} dar a dica.`);
+
+  // Inicia o contador
+  timerInterval = setInterval(() => {
+    remainingTime--;
+    
+    // Emite o tempo atualizado
+    io.emit('atualiza-cronometro', formatTime(remainingTime));
+
+    // Se o tempo acabar
+    if (remainingTime <= 0) {
+      clearInterval(timerInterval);
+      
+      // Força o fim do turno do jogador
+      const fakeTip = { tip: "(Tempo Esgotado)", number: 0 }; // Dica "falsa"
+      const playerInfo = { id: player.id, name: player.name };
+      
+      currentTips.push({ ...fakeTip, player: playerInfo });
+
+      // Atualiza o monitor com a dica falsa
+      io.emit('nova-dica', { jogador: player.name, texto: fakeTip.tip });
+      broadcastMonitor('Tempo Esgotado', `Tempo de ${player.name} esgotou.`);
+
+      // Lógica para chamar o próximo jogador ou encerrar (copiado do 'sendTip')
+      if (currentTips.length < players.length) {
+        startTipperTimer(players[currentTips.length]); // Inicia o timer para o PRÓXIMO jogador
+      } else {
+        const shuffledTips = [...currentTips].sort(() => Math.random() - 0.5).map(t => t.tip);
+        io.emit('startSortingPhase', shuffledTips);
+        io.emit('atualiza-jogador-da-vez', 'Ninguém');
+        io.emit('atualiza-cronometro', '--:--');
+        broadcastMonitor('Fase de Ordenação', 'Todas as dicas foram dadas.');
+      }
+    }
+  }, 1000); // 1000ms = 1 segundo
+}
+
 
 // =======================================================
 // === LÓGICA PRINCIPAL DO JOGO (COM MONITORAMENTO) ===
 // =======================================================
 
 io.on('connection', (socket) => {
-  // Envia o estado atual para o jogador que acabou de conectar
   socket.emit('updatePlayers', players);
-
-  // Envia o estado atual para TODOS os monitores
   updateMonitor();
   broadcastMonitor('Aguardando Jogadores');
+  io.emit('atualiza-cronometro', '--:--'); // Garante que o cronômetro esteja zerado
 
   socket.on('addPlayer', ({ name }) => {
     if (players.length < 8 && !players.some(p => p.id === socket.id)) {
       const newPlayer = { id: socket.id, name, score: 0 };
       players.push(newPlayer);
       matchData.cumulativeScores[newPlayer.id] = matchData.cumulativeScores[newPlayer.id] || 0;
-      
-      io.emit('updatePlayers', players); // Para o jogo
-      
-      // Para o monitor
+      io.emit('updatePlayers', players); 
       updateMonitor(); 
       broadcastMonitor('Aguardando Jogadores', `Jogador ${newPlayer.name} entrou na sala.`);
     }
   });
 
   socket.on('resetPlayers', () => {
+    if (timerInterval) clearInterval(timerInterval); // PARA O TIMER
     players = [];
     resetRoundState();
     matchData = { rounds: [], cumulativeScores: {} };
-    io.emit('resetGame'); // Para o jogo
-    
-    // Para o monitor
+    io.emit('resetGame'); 
     broadcastMonitor('Jogo Resetado', 'O jogo foi reiniciado pelo anfitrião.');
+    io.emit('atualiza-cronometro', '--:--');
   });
 
   socket.on('startGame', (data) => {
+    if (timerInterval) clearInterval(timerInterval); // PARA O TIMER
     resetRoundState(players.length);
     players.forEach(p => {
       matchData.cumulativeScores[p.id] = matchData.cumulativeScores[p.id] || p.score || 0;
@@ -219,9 +267,8 @@ io.on('connection', (socket) => {
       ? temas[Math.floor(Math.random() * temas.length)]
       : { categoria: data.categoria, tema: data.tema };
     
-    io.emit('gameStarted', gameInfo); // Para o jogo
+    io.emit('gameStarted', gameInfo); 
     
-    // Para o monitor
     const roundNumber = matchData.rounds.length + 1;
     io.emit('atualiza-rodada', { numero: roundNumber, tema: gameInfo.tema });
     broadcastMonitor(`Rodada ${roundNumber} Iniciada`, `Tema: ${gameInfo.tema}`);
@@ -229,47 +276,38 @@ io.on('connection', (socket) => {
 
   socket.on('requestNextTipper', () => {
     if (currentTips.length < players.length) {
-      const player = players[currentTips.length];
-      io.emit('nextTipper', player); // Para o jogo
-      
-      // Para o monitor
-      io.emit('atualiza-jogador-da-vez', player.name);
-      io.emit('atualiza-cronometro', '--:--'); // Sem timer
-      broadcastMonitor(`Aguardando Dica`, `É a vez de ${player.name} dar a dica.`);
-
+      // AQUI É A MUDANÇA: Em vez de emitir, chamamos a função que liga o timer
+      startTipperTimer(players[currentTips.length]);
     } else {
+      // Se acabou as dicas, paramos o timer
+      if (timerInterval) clearInterval(timerInterval);
       const shuffledTips = [...currentTips].sort(() => Math.random() - 0.5).map(t => t.tip);
-      io.emit('startSortingPhase', shuffledTips); // Para o jogo
-      
-      // Para o monitor
+      io.emit('startSortingPhase', shuffledTips); 
       io.emit('atualiza-jogador-da-vez', 'Ninguém');
+      io.emit('atualiza-cronometro', '--:--');
       broadcastMonitor('Fase de Ordenação', 'Todas as dicas foram dadas. Iniciando ordenação.');
     }
   });
 
   socket.on('sendTip', (tipData) => {
+    // MUDANÇA CRÍTICA: Parar o timer assim que a dica é recebida!
+    if (timerInterval) clearInterval(timerInterval);
+    io.emit('atualiza-cronometro', '--:--'); // Limpa o cronômetro
+
     const player = players.find(p => p.id === socket.id);
     if (player) {
       const number = tipData.number; 
       currentTips.push({ ...tipData, number, player: { id: socket.id, name: player.name } });
 
-      // Para o monitor (enviando a dica nova)
       io.emit('nova-dica', { jogador: player.name, texto: tipData.tip });
       broadcastMonitor('Dica Recebida', `Dica ${currentTips.length}/${players.length} recebida de ${player.name}.`);
 
-      // Lógica do jogo (continua)
       if (currentTips.length < players.length) {
-        io.emit('nextTipper', players[currentTips.length]);
-        // Atualiza o monitor para o próximo jogador
-        const nextPlayer = players[currentTips.length];
-        io.emit('atualiza-jogador-da-vez', nextPlayer.name);
-        io.emit('atualiza-cronometro', '--:--');
-        broadcastMonitor(`Aguardando Dica`, `É a vez de ${nextPlayer.name} dar a dica.`);
-
+        // Em vez de emitir, chamamos a função que liga o timer para o PRÓXIMO jogador
+        startTipperTimer(players[currentTips.length]);
       } else {
         const shuffledTips = [...currentTips].sort(() => Math.random() - 0.5).map(t => t.tip);
-        io.emit('startSortingPhase', shuffledTips); // Para o jogo
-        // Atualiza o monitor
+        io.emit('startSortingPhase', shuffledTips);
         io.emit('atualiza-jogador-da-vez', 'Ninguém');
         broadcastMonitor('Fase de Ordenação', 'Todas as dicas foram dadas. Iniciando ordenação.');
       }
@@ -280,18 +318,17 @@ io.on('connection', (socket) => {
     const player = players.find(p => p.id === socket.id);
     if (!player || roundData.playersWhoFinished[player.id]) return;
 
+    // ... (toda a lógica de 'checkOrder' permanece a mesma) ...
+    
     if (roundData.playerAttempts[player.id] === undefined) {
       roundData.playerAttempts[player.id] = 3;
     }
     roundData.playerAttempts[player.id]--;
     const attemptsLeft = roundData.playerAttempts[player.id];
-
     const correctOrderObjects = [...currentTips].sort((a, b) => a.number - b.number);
     const correctOrderText = correctOrderObjects.map(t => t.tip);
-
     const normalize = s => (s || '').trim().normalize('NFC');
     const isCorrect = orderedTips.every((v, i) => normalize(v) === normalize(correctOrderText[i]));
-
     let points = 0;
     if (isCorrect) {
       if (attemptsLeft === 2) points = 30;
@@ -299,44 +336,35 @@ io.on('connection', (socket) => {
       else if (attemptsLeft === 0) points = 10;
       player.score += points;
       roundData.roundScores[player.id] = (roundData.roundScores[player.id] || 0) + points;
-      
-      // Para o monitor
       broadcastMonitor('Ordenação em Andamento', `${player.name} ACERTOU a ordem e ganhou ${points} pontos.`);
-
     } else {
       if (attemptsLeft === 0) {
         roundData.roundScores[player.id] = roundData.roundScores[player.id] || 0;
-        // Para o monitor
         broadcastMonitor('Ordenação em Andamento', `${player.name} esgotou as tentativas.`);
       } else {
-        // Para o monitor
         broadcastMonitor('Ordenação em Andamento', `${player.name} errou. ${attemptsLeft} tentativas restantes.`);
       }
     }
-
     if (isCorrect || attemptsLeft === 0) {
       roundData.playersWhoFinished[player.id] = true;
     }
-
     const rankedPlayers = [...players].sort((a, b) => b.score - a.score);
-    
-    // Atualiza o monitor com os novos scores
     updateMonitor();
-    
     const everyoneFinished = Object.keys(roundData.playersWhoFinished).length === (roundData.totalPlayers || players.length);
     const resultPayload = { isCorrect, points, attemptsLeft, players: rankedPlayers };
 
     if (everyoneFinished) {
+      if (timerInterval) clearInterval(timerInterval); // PARA O TIMER (segurança)
+      
+      // ... (resto da lógica 'everyoneFinished' igual) ...
       const historyObjects = correctOrderObjects.map(t => ({
         number: t.number,
         tip: t.tip,
         playerName: t.player.name
       }));
-
       const historyHtml = historyObjects.map(t =>
         `<li data-numero="${t.number}"><b>${t.tip}</b> <i>(Nº ${t.number} por ${t.playerName})</i></li>`
       ).join('');
-
       const roundNumber = matchData.rounds.length + 1;
       const roundResult = {
         roundNumber,
@@ -344,14 +372,11 @@ io.on('connection', (socket) => {
         roundScores: { ...roundData.roundScores },
         playersSnapshot: rankedPlayers.map(p => ({ id: p.id, name: p.name, score: p.score }))
       };
-
       Object.keys(roundData.roundScores).forEach(pid => {
         matchData.cumulativeScores[pid] = (matchData.cumulativeScores[pid] || 0) + roundData.roundScores[pid];
       });
-
       matchData.rounds.push(roundResult);
-
-      io.emit('roundOver', { // Para o jogo
+      io.emit('roundOver', { 
         historyHtml,
         historyObjects,
         players: rankedPlayers,
@@ -360,28 +385,31 @@ io.on('connection', (socket) => {
         roundScores: roundData.roundScores,
         matchRoundsCount: matchData.rounds.length
       });
-      
-      // Para o monitor
       broadcastMonitor('Fim da Rodada', `Rodada ${roundNumber} finalizada.`);
+      io.emit('atualiza-cronometro', '--:--'); // Limpa o cronômetro
 
     } else {
-      socket.emit('orderResult', resultPayload); // Para o jogo
+      socket.emit('orderResult', resultPayload); 
     }
   });
 
   socket.on('endMatch', () => {
+    if (timerInterval) clearInterval(timerInterval); // PARA O TIMER
+    
     const finalRanking = [...players].sort((a, b) => b.score - a.score);
-    io.emit('matchOver', { // Para o jogo
+    io.emit('matchOver', { 
       rounds: matchData.rounds,
       finalRanking: finalRanking.map(p => ({ id: p.id, name: p.name, score: p.score })),
       cumulativeScores: matchData.cumulativeScores
     });
 
-    // Para o monitor
     broadcastMonitor('Fim de Jogo', 'Partida finalizada. Exibindo ranking final.');
+    io.emit('atualiza-cronometro', '--:--');
   });
 
   socket.on('disconnect', () => {
+    if (timerInterval) clearInterval(timerInterval); // PARA O TIMER
+
     const playerIndex = players.findIndex(p => p.id === socket.id);
     if (playerIndex > -1) {
         const playerName = players[playerIndex].name;
@@ -391,9 +419,7 @@ io.on('connection', (socket) => {
         }
         delete matchData.cumulativeScores[socket.id];
         
-        io.emit('updatePlayers', players); // Para o jogo
-
-        // Para o monitor
+        io.emit('updatePlayers', players); 
         updateMonitor();
         broadcastMonitor('Jogador Desconectado', `${playerName} saiu da sala.`);
     }
