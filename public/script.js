@@ -43,6 +43,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalRankingUl = document.getElementById('finalRanking');
     const btnVoltarInicio = document.getElementById('btn-voltar-inicio');
     
+    // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+    const cronometroDisplay = document.getElementById('cronometro-display');
+    const cronometroContainer = document.getElementById('cronometro-jogo-container');
+    // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+    
     let currentSecretNumber = 0;
     let sortable;
     let lastRoundResult = null;
@@ -185,6 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
         btnResetJogadores.classList.add('hidden');
         listaDicasUl.innerHTML = '';
         numeroSecretoDisplay.classList.add('hidden');
+        
+        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        if (cronometroContainer) cronometroContainer.classList.add('hidden');
+        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+        
         lastRoundResult = null;
         numRodadaSpan.textContent = parseInt(numRodadaSpan.textContent || 0) + 1;
         categoriaRodadaSpan.textContent = gameInfo.categoria;
@@ -197,6 +207,11 @@ document.addEventListener('DOMContentLoaded', () => {
         nomeJogadorDicaSpan.textContent = player.name;
         const isMyTurn = player.id === socket.id;
         espacoDicas.classList.toggle('hidden', !isMyTurn);
+        
+        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        if (cronometroContainer) cronometroContainer.classList.remove('hidden');
+        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+        
         if (isMyTurn) {
             currentSecretNumber = Math.floor(Math.random() * 100) + 1;
             numeroSecretoDisplay.textContent = currentSecretNumber;
@@ -210,6 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('startSortingPhase', (tipsToGuess) => {
         espacoDicas.classList.add('hidden');
+        
+        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        if (cronometroContainer) cronometroContainer.classList.add('hidden');
+        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+        
         nomeJogadorVezSpan.textContent = 'Sua vez de ordenar!';
         ordenacaoSection.classList.remove('hidden');
         tentativasRestantesSpan.textContent = 3;
@@ -241,6 +261,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     socket.on('roundOver', (result) => {
         if (!result || !result.players) return;
+        
+        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        if (cronometroContainer) cronometroContainer.classList.add('hidden');
+        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
 
         // esconder seção de ordenação e preparar área de resultados
         ordenacaoSection.classList.add('hidden');
@@ -290,6 +314,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Recebe o fim da partida com histórico completo
     socket.on('matchOver', (data) => {
+        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        if (cronometroContainer) cronometroContainer.classList.add('hidden');
+        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+        
         // Mostra ranking final
         const matchResultsContainer = document.getElementById('match-results');
         if (matchResultsContainer) matchResultsContainer.classList.remove('hidden');
@@ -317,4 +345,22 @@ document.addEventListener('DOMContentLoaded', () => {
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
     }
+    
+    // ▼▼▼ LISTENER DO CRONÔMETRO ADICIONADO AQUI ▼▼▼
+    socket.on('atualiza-cronometro', (tempo) => {
+        if (cronometroDisplay) {
+            cronometroDisplay.textContent = tempo;
+            
+            // Remove classes de estilo antigas
+            cronometroDisplay.classList.remove('timer-urgente', 'timer-acabou');
+
+            // Adiciona classes de alerta
+            if (tempo === "00:00") {
+                cronometroDisplay.classList.add('timer-acabou');
+            } else if (tempo <= "00:10") { // Menos de 10 segundos
+                cronometroDisplay.classList.add('timer-urgente');
+            }
+        }
+    });
+    // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
 });
