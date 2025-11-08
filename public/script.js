@@ -189,10 +189,9 @@ document.addEventListener('DOMContentLoaded', () => {
         btnProximaRodada.classList.add('hidden');
         btnResetJogadores.classList.add('hidden');
         listaDicasUl.innerHTML = '';
-        numeroSecretoDisplay.classList.add('hidden');
         
-        // ▼▼▼ CORREÇÃO DO BUG FATAL ▼▼▼
-        // (A variável 'isMyTurn' não existe aqui. O timer deve sempre começar escondido)
+        // ▼▼▼ CORREÇÃO DO BUG FATAL (isMyTurn não existe aqui) ▼▼▼
+        numeroSecretoDisplay.classList.add('hidden');
         if (cronometroContainer) cronometroContainer.classList.add('hidden');
         // ▲▲▲ FIM DA CORREÇÃO ▲▲▲
         
@@ -207,17 +206,17 @@ document.addEventListener('DOMContentLoaded', () => {
         nomeJogadorVezSpan.textContent = player.name;
         nomeJogadorDicaSpan.textContent = player.name;
         const isMyTurn = player.id === socket.id;
-        espacoDicas.classList.toggle('hidden', !isMyTurn);
-        
-        // ▼▼▼ CORREÇÃO DO BUG DE LAYOUT ▼▼▼
-        // (Esconde o timer se for a minha vez, mostra se não for)
-        if (cronometroContainer) cronometroContainer.classList.toggle('hidden', isMyTurn);
+
+        // ▼▼▼ LÓGICA CORRIGIDA (Timer E Número Secreto) ▼▼▼
+        espacoDicas.classList.toggle('hidden', !isMyTurn); // Mostra/Esconde input da dica
+        if (cronometroContainer) cronometroContainer.classList.toggle('hidden', isMyTurn); // Mostra timer para OS OUTROS
+        if (numeroSecretoDisplay) numeroSecretoDisplay.classList.toggle('hidden', !isMyTurn); // Mostra número secreto SÓ PARA O JOGADOR
         // ▲▲▲ FIM DA CORREÇÃO ▲▲▲
-        
+
         if (isMyTurn) {
             currentSecretNumber = Math.floor(Math.random() * 100) + 1;
             numeroSecretoDisplay.textContent = currentSecretNumber;
-            numeroSecretoDisplay.classList.remove('hidden');
+            // numeroSecretoDisplay.classList.remove('hidden'); // (Linha removida, o toggle acima já faz isso)
             inputDica.disabled = false;
             btnEnviarDica.disabled = false;
             inputDica.value = '';
@@ -228,9 +227,10 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('startSortingPhase', (tipsToGuess) => {
         espacoDicas.classList.add('hidden');
         
-        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        // ▼▼▼ CORREÇÃO (Esconde timer e número secreto) ▼▼▼
         if (cronometroContainer) cronometroContainer.classList.add('hidden');
-        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+        if (numeroSecretoDisplay) numeroSecretoDisplay.classList.add('hidden');
+        // ▲▲▲ FIM DA CORREÇÃO ▲▲▲
         
         nomeJogadorVezSpan.textContent = 'Sua vez de ordenar!';
         ordenacaoSection.classList.remove('hidden');
@@ -264,9 +264,10 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.on('roundOver', (result) => {
         if (!result || !result.players) return;
         
-        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        // ▼▼▼ CORREÇÃO (Esconde timer e número secreto) ▼▼▼
         if (cronometroContainer) cronometroContainer.classList.add('hidden');
-        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+        if (numeroSecretoDisplay) numeroSecretoDisplay.classList.add('hidden');
+        // ▲▲▲ FIM DA CORREÇÃO ▲▲▲
 
         // esconder seção de ordenação e preparar área de resultados
         ordenacaoSection.classList.add('hidden');
@@ -316,9 +317,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Recebe o fim da partida com histórico completo
     socket.on('matchOver', (data) => {
-        // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
+        // ▼▼▼ CORREÇÃO (Esconde timer e número secreto) ▼▼▼
         if (cronometroContainer) cronometroContainer.classList.add('hidden');
-        // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
+        if (numeroSecretoDisplay) numeroSecretoDisplay.classList.add('hidden');
+        // ▲▲▲ FIM DA CORREÇÃO ▲▲▲
         
         // Mostra ranking final
         const matchResultsContainer = document.getElementById('match-results');
@@ -360,7 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (tempo === "00:00") {
                 cronometroDisplay.classList.add('timer-acabou');
             } else if (tempo <= "00:10") { // Menos de 10 segundos
-                cronometroDisplay.classList.add('timer-acabou');
+                cronometroDisplay.classList.add('timer-urgente'); // Mudei de timer-acabou para timer-urgente
             }
         }
     });
