@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
         numeroSecretoDisplay.classList.add('hidden');
         
         // ▼▼▼ ADICIONADO PARA O CRONÔMETRO ▼▼▼
-        if (cronometroContainer) cronometroContainer.classList.add('hidden');
+        if (cronometroContainer) cronometroContainer.classList.toggle('hidden', isMyTurn);
         // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
         
         lastRoundResult = null;
@@ -364,3 +364,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     // ▲▲▲ FIM DA ADIÇÃO ▲▲▲
 });
+
