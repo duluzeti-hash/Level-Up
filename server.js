@@ -31,6 +31,10 @@ function formatTime(seconds) {
   const remainingSeconds = seconds % 60;
   return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 }
+// -----------------------------------------
+
+// A lista de temas (gigante) não mudou, então eu a omiti daqui para facilitar a leitura.
+// No seu arquivo final, ela deve estar aqui.
 const temas = [
     { categoria: "CUSTOS OPERACIONAIS", tema: "Analisar o impacto da variação do preço do diesel nos custos logísticos" },
     { categoria: "CUSTOS OPERACIONAIS", tema: "Comparar resultados entre manutenção preventiva e corretiva" },
@@ -119,7 +123,7 @@ const temas = [
     { categoria: "PRODUTIVIDADE", tema: "Otimizar o tempo de carga e descarga" },
     { categoria: "PRODUTIVIDADE", tema: "Reduzir ociosidade de veículos e operadores" },
     { categoria: "PRODUTIVIDADE", tema: "Aplicar métodos lean na operação logística" },
-    { categoria: "PRODUTIVIDADE", tema: "Mensurar desempenho por indicador de eficiência" },
+    { categoria: "PRODUTIVidade", tema: "Mensurar desempenho por indicador de eficiência" },
     { categoria: "PRODUTIVIDADE", tema: "Eliminar gargalos nos fluxos de trabalho" },
     { categoria: "LIDERANÇA", tema: "Inspirar equipes para alto desempenho" },
     { categoria: "LIDERANÇA", tema: "Delegar tarefas de forma clara e eficiente" },
@@ -132,6 +136,7 @@ const temas = [
     { categoria: "COMUNICAÇÃO", tema: "Fortalecer a cultura de diálogo e transparência" },
     { categoria: "COMUNICAÇÃO", tema: "Evitar ruídos e retrabalhos por falhas de informação" }
 ];
+
 
 function resetRoundState(total = null) {
   if (timerInterval) clearInterval(timerInterval); // Para o timer se o jogo resetar
