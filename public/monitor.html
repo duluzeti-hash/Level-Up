@@ -201,7 +201,7 @@
           </ul>
     </div>
 
-    <div class="box" id="status-jogadores">
+    <div class_box" id="status-jogadores">
       <h2>Jogadores Conectados</h2>
       <ul id="lista-jogadores">
           </ul>
@@ -244,33 +244,28 @@
 
     // --- Listeners do Socket ---
 
-    // CORREÇÃO 1: (j.nome -> j.name)
     socket.on("atualiza-jogadores", (jogadores) => {
       elListaJogadores.innerHTML = "";
       jogadores.forEach(j => {
         const li = document.createElement("li");
-        // Ex: "Duzão (Equipe 1) - Conectado"
         li.textContent = `${j.name} (Equipe ${j.equipe}) ${j.conectado ? "- Conectado" : "- Offline"}`;
         elListaJogadores.appendChild(li);
       });
-    }); // <-- Correção de sintaxe (fechamento)
+    });
 
     socket.on("atualiza-rodada", (rodada) => {
       elNumeroRodada.textContent = rodada.numero;
       elTemaRodada.textContent = rodada.tema;
-      // Limpa as dicas da rodada anterior
       elListaDicas.innerHTML = ""; 
 
       // **** NOSSA MUDANÇA (Esconder o resumo) ****
       if (elResumoOverlay) { 
           elResumoOverlay.style.display = "none";
       }
-    }); // <-- Correção de sintaxe (fechamento)
+    });
 
-    // CORREÇÃO 2: (for...in -> forEach)
     socket.on("atualiza-pontuacao", (pontos) => {
       elPlacar.innerHTML = "";
-      // O servidor envia um array de objetos, ex: [{equipe: 'Gege', pontos: 10}]
       pontos.forEach(p => {
         const li = document.createElement("li");
         li.textContent = `${p.equipe}: ${p.pontos} pts`;
@@ -278,11 +273,9 @@
       });
     });
 
-    // Modificado para 'nova-dica' para adicionar uma por vez
     socket.on("nova-dica", (dica) => {
       const li = document.createElement("li");
       li.textContent = `${dica.jogador}: ${dica.texto}`;
-      // Adiciona a dica no topo da lista
       elListaDicas.prepend(li);
     });
 
@@ -303,8 +296,7 @@
     socket.on("log-evento", (mensagem) => {
         const li = document.createElement("li");
         li.textContent = `[${new Date().toLocaleTimeString()}]: ${mensagem}`;
-        // Adiciona no topo e rola para o início
-        elListaLog.prepend(li); 
+        elListaLog.prepend(li); // <-- 'j' REMOVIDO DAQUI
     });
 
     // **** NOSSO NOVO LISTENER (Mostrar e preencher o resumo) ****
@@ -315,11 +307,10 @@
         elResumoGabarito.innerHTML = "";
         dados.gabarito.forEach(item => {
             const li = document.createElement("li");
-            // Esperando dados como: { numero: 48, texto: 'Utilizar água...' }
             if (item.numero && item.texto) {
                  li.textContent = `(${item.numero}) ${item.texto}`;
             } else {
-                 li.textContent = item; // Fallback para string simples
+                 li.textContent = item;
             }
             elResumoGabarito.appendChild(li);
         });
@@ -328,11 +319,9 @@
         elResumoPlacar.innerHTML = "";
         dados.placar.forEach(p => {
             const li = document.createElement("li");
-            // Esperando dados como: { texto: 'Du — +30 (na rodada)' }
             if (p.texto) {
                 li.textContent = p.texto;
             } else {
-                // Fallback para o formato antigo (se p.texto não vier)
                 li.textContent = `${p.equipe}: ${p.pontos} pts`;
             }
             elResumoPlacar.appendChild(li);
@@ -364,5 +353,3 @@
 
 </body>
 </html>
-
-
