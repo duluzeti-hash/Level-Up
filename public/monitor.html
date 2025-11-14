@@ -308,15 +308,15 @@
             elResumoGabarito.innerHTML = "";
             dados.gabarito.forEach(item => {
                 const li = document.createElement("li");
-                if (item.numero && item.texto) {
+                if (item && item.numero && item.texto) { // <-- Verificação extra
                      li.textContent = `(${item.numero}) ${item.texto}`;
-                } else {
-                     li.textContent = item;
+                } else if (item) {
+                     li.textContent = item.toString(); // Fallback
                 }
                 elResumoGabarito.appendChild(li);
             });
         } catch (e) {
-            console.error("Erro ao preencher gabarito:", e);
+            console.error("Erro ao preencher gabarito:", e, dados.gabarito);
             elResumoGabarito.innerHTML = "<li>Erro ao carregar gabarito.</li>";
         }
 
@@ -325,21 +325,23 @@
             elResumoPlacar.innerHTML = "";
             dados.placar.forEach(p => {
                 const li = document.createElement("li");
-                if (p.texto) {
+                if (p && p.texto) {
                     li.textContent = p.texto;
-                } else {
-                    li.textContent = `${p.equipe}: ${p.pontos} pts`;
+                } else if (p) {
+                    li.textContent = p.toString(); // Fallback
                 }
                 elResumoPlacar.appendChild(li);
             });
         } catch (e) {
-            console.error("Erro ao preencher placar:", e);
+            console.error("Erro ao preencher placar:", e, dados.placar);
             elResumoPlacar.innerHTML = "<li>Erro ao carregar placar.</li>";
         }
         
         // 3. Exibir o Overlay (IMPORTANTE: usar 'flex')
         // Esta linha agora é executada mesmo se o preenchimento falhar
-        elResumoOverlay.style.display = "flex"; 
+        if (elResumoOverlay) { // Verificação final
+            elResumoOverlay.style.display = "flex"; 
+        }
     });
 
   </script>
