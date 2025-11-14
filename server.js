@@ -89,7 +89,7 @@ const temas = [
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Qual a forma mais eficiente de coletar e transportar produtos pós-consumo?" },
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Como gerenciar devoluções e trocas de produtos danificados?" },
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Como integrar sistemas de rastreio para o retorno de materiais?" },
-  { "categoria": "LOGÍSTICA REVERSA", "tema": "Como aproveitar resíduos (sucata, etc.) como insumo para novas operações?" },
+ S{ "categoria": "LOGÍSTICA REVERSA", "tema": "Como aproveitar resíduos (sucata, etc.) como insumo para novas operações?" },
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Qual o custo vs. benefício real da logística reversa?" },
   { "categoria": "INFRAESTRUTURA", "tema": "Qual o impacto real das condições das estradas na manutenção e custo?" },
   { "categoria": "INFRAESTRUTURA", "tema": "Como planejar rotas alternativas eficientes em períodos de obras?" },
@@ -124,7 +124,7 @@ const temas = [
   { "categoria": "PRODUTIVIDADE", "tema": "Como reduzir a ociosidade de veículos e operadores?" },
   { "categoria": "PRODUTIVIDADE", "tema": "Quais métodos 'Lean Logistics' aplicar na operação?" },
   { "categoria": "PRODUTIVIDADE", "tema": "Quais indicadores de eficiência (ex: OEE) usar para mensurar o desempenho?" },
-  { "categoria": "PRODUTIVIDADE", "tema": "Como identificar e eliminar gargalos nos fluxos de trabalho?" },
+ Videos{ "categoria": "PRODUTIVIDADE", "tema": "Como identificar e eliminar gargalos nos fluxos de trabalho?" },
   { "categoria": "LIDERANÇA", "tema": "Como o líder deve inspirar as equipes para o alto desempenho?" },
   { "categoria": "LIDERANÇA", "tema": "Qual a forma mais clara e eficiente de delegar tarefas operacionais?" },
   { "categoria": "LIDERANÇA", "tema": "Como conduzir reuniões operacionais (daily meetings) produtivas?" },
@@ -132,7 +132,7 @@ const temas = [
   { "categoria": "LIDERANÇA", "tema": "Qual a melhor técnica para dar feedback construtivo para equipes?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como melhorar a comunicação entre setores (Ex: Comercial x Operação)?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como padronizar as instruções de serviço (IS) para motoristas?" },
-  { "categoria": "COMUNICAÇÃO", "tema": "Como usar a linguagem assertiva (e não agressiva) em reuniões?" },
+ Labels{ "categoria": "COMUNICAÇÃO", "tema": "Como usar a linguagem assertiva (e não agressiva) em reuniões?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como fortalecer a cultura de diálogo e transparência na empresa?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como evitar retrabalho causado por falhas de comunicação?" }
 ];
@@ -380,6 +380,42 @@ io.on('connection', (socket) => {
         matchData.cumulativeScores[pid] = (matchData.cumulativeScores[pid] || 0) + roundData.roundScores[pid];
       });
       matchData.rounds.push(roundResult);
+
+      // ===================================================================
+      // ==== NOSSA ADIÇÃO (MONITOR DE RESUMO DA RODADA) ====
+      // ===================================================================
+      
+      // 1. Preparar dados do Gabarito (baseado na ordem correta)
+      const dadosGabarito = correctOrderObjects.map(t => ({
+          numero: t.number,
+          texto: t.tip
+      }));
+
+      // 2. Preparar dados do Placar (baseado nos scores da rodada)
+      const dadosPlacar = players
+          .map(player => ({
+              name: player.name,
+              roundScore: roundData.roundScores[player.id] || 0 // Pega o score da rodada
+          }))
+          .sort((a, b) => b.roundScore - a.roundScore) // Ordena por quem pontuou mais
+          .map(p => ({
+              // Formata como o monitor espera: "Du — +30 (na rodada)"
+              texto: `${p.name} — +${p.roundScore} (na rodada)` 
+          }));
+
+      // 3. Montar o objeto final
+      const dadosResumo = {
+          gabarito: dadosGabarito,
+          placar: dadosPlacar
+      };
+
+      // 4. Emitir o novo evento para o monitor (e para o jogo)
+      io.emit("exibir-resumo-rodada", dadosResumo);
+      
+      // ===================================================================
+      // ==== FIM DA NOSSA ADIÇÃO ====
+      // ===================================================================
+
       io.emit('roundOver', { 
         historyHtml,
         historyObjects,
@@ -434,4 +470,3 @@ server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
   broadcastMonitor('Servidor Iniciado', 'Servidor online e aguardando conexões.');
 });
-
