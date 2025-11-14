@@ -132,7 +132,7 @@
         border-radius: 8px;
         border: 1px solid rgba(255, 165, 0, 0.5); /* Borda laranja */
         
-        /* Controle de altura caso a lista seja longa */
+        /* Controle de altura caso a lista longa */
         max-height: 80vh; 
         overflow-y: auto;
     }
@@ -300,34 +300,45 @@
     });
 
     // **** NOSSO NOVO LISTENER (Mostrar e preencher o resumo) ****
+    // **** ATUALIZADO COM TRY...CATCH ****
     socket.on("exibir-resumo-rodada", (dados) => {
-        // dados = { gabarito: [...], placar: [...] }
+        
+        try {
+            // 1. Preencher Gabarito
+            elResumoGabarito.innerHTML = "";
+            dados.gabarito.forEach(item => {
+                const li = document.createElement("li");
+                if (item.numero && item.texto) {
+                     li.textContent = `(${item.numero}) ${item.texto}`;
+                } else {
+                     li.textContent = item;
+                }
+                elResumoGabarito.appendChild(li);
+            });
+        } catch (e) {
+            console.error("Erro ao preencher gabarito:", e);
+            elResumoGabarito.innerHTML = "<li>Erro ao carregar gabarito.</li>";
+        }
 
-        // 1. Preencher Gabarito
-        elResumoGabarito.innerHTML = "";
-        dados.gabarito.forEach(item => {
-            const li = document.createElement("li");
-            if (item.numero && item.texto) {
-                 li.textContent = `(${item.numero}) ${item.texto}`;
-            } else {
-                 li.textContent = item;
-            }
-            elResumoGabarito.appendChild(li);
-        });
-
-        // 2. Preencher Placar
-        elResumoPlacar.innerHTML = "";
-        dados.placar.forEach(p => {
-            const li = document.createElement("li");
-            if (p.texto) {
-                li.textContent = p.texto;
-            } else {
-                li.textContent = `${p.equipe}: ${p.pontos} pts`;
-            }
-            elResumoPlacar.appendChild(li);
-        });
+        try {
+            // 2. Preencher Placar
+            elResumoPlacar.innerHTML = "";
+            dados.placar.forEach(p => {
+                const li = document.createElement("li");
+                if (p.texto) {
+                    li.textContent = p.texto;
+                } else {
+                    li.textContent = `${p.equipe}: ${p.pontos} pts`;
+                }
+                elResumoPlacar.appendChild(li);
+            });
+        } catch (e) {
+            console.error("Erro ao preencher placar:", e);
+            elResumoPlacar.innerHTML = "<li>Erro ao carregar placar.</li>";
+        }
         
         // 3. Exibir o Overlay (IMPORTANTE: usar 'flex')
+        // Esta linha agora é executada mesmo se o preenchimento falhar
         elResumoOverlay.style.display = "flex"; 
     });
 
