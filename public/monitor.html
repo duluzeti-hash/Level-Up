@@ -198,27 +198,45 @@
     <div class="box" id="pontuacao">
       <h2>Pontuação</h2>
       <ul id="placar">
-          </ul>
+        </ul>
     </div>
 
     <div class="box" id="status-jogadores">
       <h2>Jogadores Conectados</h2>
       <ul id="lista-jogadores">
-          </ul>
+        </ul>
     </div>
 
     <div class="box" id="dicas">
       <h2>Dicas da Rodada</h2>
       <ul id="lista-dicas">
-          </ul>
+        </ul>
     </div>
 
     <div class="box" id="log-eventos">
       <h2>Log de Eventos</h2>
       <ul id="lista-log">
-          </ul>
+        </ul>
     </div>
   </div>
+
+  <div id="monitor-resumo-overlay">
+    <div id="resumo-container">
+        
+        <div class="resumo-coluna">
+            <h2 class="titulo-ciano">Gabarito da Rodada</h2>
+            <ul id="resumo-lista-gabarito">
+                </ul>
+        </div>
+        
+        <div class="resumo-coluna">
+            <h2 class="titulo-ciano">Placar (ranking atual)</h2>
+            <ul id="resumo-lista-placar">
+                </ul>
+        </div>
+
+    </div>
+</div>
 
   <script>
     // Conecta ao servidor (mesmo endereço do jogo)
@@ -238,6 +256,7 @@
     const elListaLog = document.getElementById("lista-log");
 
     // **** NOSSOS NOVOS SELETORES (DO RESUMO) ****
+    // AGORA ELES VÃO FUNCIONAR, POIS O HTML JÁ FOI LIDO
     const elResumoOverlay = document.getElementById("monitor-resumo-overlay");
     const elResumoGabarito = document.getElementById("resumo-lista-gabarito");
     const elResumoPlacar = document.getElementById("resumo-lista-placar");
@@ -309,9 +328,9 @@
             dados.gabarito.forEach(item => {
                 const li = document.createElement("li");
                 if (item && item.numero && item.texto) { // <-- Verificação extra
-                     li.textContent = `(${item.numero}) ${item.texto}`;
+                      li.textContent = `(${item.numero}) ${item.texto}`;
                 } else if (item) {
-                     li.textContent = item.toString(); // Fallback
+                      li.textContent = item.toString(); // Fallback
                 }
                 elResumoGabarito.appendChild(li);
             });
@@ -345,24 +364,6 @@
     });
 
   </script>
-
-  <div id="monitor-resumo-overlay">
-    <div id="resumo-container">
-        
-        <div class="resumo-coluna">
-            <h2 class="titulo-ciano">Gabarito da Rodada</h2>
-            <ul id="resumo-lista-gabarito">
-                </ul>
-        </div>
-        
-        <div class="resumo-coluna">
-            <h2 class="titulo-ciano">Placar (ranking atual)</h2>
-            <ul id="resumo-lista-placar">
-                </ul>
-        </div>
-
-    </div>
-</div>
 
 </body>
 </html>
