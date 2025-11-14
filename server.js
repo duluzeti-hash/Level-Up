@@ -63,7 +63,7 @@ const temas = [
   { "categoria": "TECNOLOGIA", "tema": "Quão mais eficiente é a entrega com roteirização inteligente?" },
   { "categoria": "TECNOLOGIA", "tema": "Quais os benefícios de integrar sistemas ERP e TMS/Logística?" },
   { "categoria": "TECNOLOGIA", "tema": "Onde aplicar Inteligência Artificial (IA) na gestão de frotas?" },
-  { "categoria": "TECNOLOGIA", "tema": "Quais processos administrativos no transporte podem ser automatizados?" },
+  { "categoria": "TECNologia", "tema": "Quais processos administrativos no transporte podem ser automatizados?" },
   { "categoria": "INOVAÇÃO", "tema": "Quais as tendências em veículos elétricos e híbridos para frotas?" },
   { "categoria": "INOVAÇÃO", "tema": "Quando será viável testar caminhões autônomos em rotas controladas?" },
   { "categoria": "INOVAÇÃO", "tema": "Como criar soluções práticas para a logística urbana inteligente?" },
@@ -79,7 +79,7 @@ const temas = [
   { "categoria": "SEGURANÇA", "tema": "O que inspecionar (checklist) nos veículos antes de cada viagem?" },
   { "categoria": "SEGURANÇA", "tema": "Como capacitar as equipes para atuação em emergências na estrada?" },
   { "categoria": "SEGURANÇA", "tema": "Como gerenciar incidentes e 'quase-acidentes' (near misses)?" },
- sem { "categoria": "LOGÍSTICA VERDE", "tema": "Como aplicar os princípios de ESG (Ambiental, Social, Governança) no transporte?" },
+  { "categoria": "LOGÍSTICA VERDE", "tema": "Como aplicar os princípios de ESG (Ambiental, Social, Governança) no transporte?" },
   { "categoria": "LOGÍSTICA VERDE", "tema": "Como reduzir efetivamente as emissões de CO2 nas operações?" },
   { "categoria": "LOGÍSTICA VERDE", "tema": "Quais materiais e embalagens de transporte podem ser reaproveitados?" },
   { "categoria": "LOGÍSTICA VERDE", "tema": "Como implementar uma operação logística de baixo impacto ambiental?" },
@@ -87,7 +87,7 @@ const temas = [
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Qual a forma mais eficiente de coletar e transportar produtos pós-consumo?" },
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Como gerenciar devoluções e trocas de produtos danificados?" },
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Como integrar sistemas de rastreio para o retorno de materiais?" },
-  { "categoria": "LOGÍSTICA REVERSA", "tema": "Como aproveitar resíduos (sucata, etc.) como insumo para novas operações?" }, // <-- 'S' REMOVIDO
+  { "categoria": "LOGÍSTICA REVERSA", "tema": "Como aproveitar resíduos (sucata, etc.) como insumo para novas operações?" },
   { "categoria": "LOGÍSTICA REVERSA", "tema": "Qual o custo vs. benefício real da logística reversa?" },
   { "categoria": "INFRAESTRUTURA", "tema": "Qual o impacto real das condições das estradas na manutenção e custo?" },
   { "categoria": "INFRAESTRUTURA", "tema": "Como planejar rotas alternativas eficientes em períodos de obras?" },
@@ -122,7 +122,7 @@ const temas = [
   { "categoria": "PRODUTIVIDADE", "tema": "Como reduzir a ociosidade de veículos e operadores?" },
   { "categoria": "PRODUTIVIDADE", "tema": "Quais métodos 'Lean Logistics' aplicar na operação?" },
   { "categoria": "PRODUTIVIDADE", "tema": "Quais indicadores de eficiência (ex: OEE) usar para mensurar o desempenho?" },
-  { "categoria": "PRODUTIVIDADE", "tema": "Como identificar e eliminar gargalos nos fluxos de trabalho?" }, // <-- 'Videos' REMOVIDO
+  { "categoria": "PRODUTIVIDADE", "tema": "Como identificar e eliminar gargalos nos fluxos de trabalho?" },
   { "categoria": "LIDERANÇA", "tema": "Como o líder deve inspirar as equipes para o alto desempenho?" },
   { "categoria": "LIDERANÇA", "tema": "Qual a forma mais clara e eficiente de delegar tarefas operacionais?" },
   { "categoria": "LIDERANÇA", "tema": "Como conduzir reuniões operacionais (daily meetings) produtivas?" },
@@ -130,7 +130,7 @@ const temas = [
   { "categoria": "LIDERANÇA", "tema": "Qual a melhor técnica para dar feedback construtivo para equipes?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como melhorar a comunicação entre setores (Ex: Comercial x Operação)?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como padronizar as instruções de serviço (IS) para motoristas?" },
-  { "categoria": "COMUNICAÇÃO", "tema": "Como usar a linguagem assertiva (e não agressiva) em reuniões?" }, // <-- 'Labels' REMOVIDO
+  { "categoria": "COMUNICAÇÃO", "tema": "Como usar a linguagem assertiva (e não agressiva) em reuniões?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como fortalecer a cultura de diálogo e transparência na empresa?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como evitar retrabalho causado por falhas de comunicação?" }
 ];
