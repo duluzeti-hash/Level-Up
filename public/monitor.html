@@ -201,7 +201,7 @@
           </ul>
     </div>
 
-    <div class_box" id="status-jogadores">
+    <div class="box" id="status-jogadores">
       <h2>Jogadores Conectados</h2>
       <ul id="lista-jogadores">
           </ul>
@@ -296,7 +296,7 @@
     socket.on("log-evento", (mensagem) => {
         const li = document.createElement("li");
         li.textContent = `[${new Date().toLocaleTimeString()}]: ${mensagem}`;
-        elListaLog.prepend(li); // <-- 'j' REMOVIDO DAQUI
+        elListaLog.prepend(li); 
     });
 
     // **** NOSSO NOVO LISTENER (Mostrar e preencher o resumo) ****
