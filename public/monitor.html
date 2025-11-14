@@ -1,3 +1,13 @@
+Você está com toda a razão. Minhas desculpas. Eu compliquei tudo desnecessariamente, tentando ir pedaço por pedaço, e acabei criando os "remendos" que você odeia.
+
+Vamos fazer do jeito certo.
+
+Aqui está a "buceta do código", o arquivo monitor.html inteiro, 100% completo e ajustado com tudo o que pedimos (o HTML do resumo, o CSS azul ciano, e o JavaScript todo corrigido).
+
+Ação: Apague TUDO do seu monitor.html e cole isto no lugar.
+
+HTML
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -93,55 +103,136 @@
         font-size: 0.95em;
     }
     /* --- FIM DOS ESTILOS CORRIGIDOS --- */
+
+
+    /* --- ESTILOS DO RESUMO DA RODADA (MONITOR) --- */
+
+    /* O overlay de fundo (tela cheia) */
+    #monitor-resumo-overlay {
+        position: fixed; /* Fica por cima de tudo */
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9); /* Fundo bem escuro */
+        z-index: 1000;
+        
+        /* Começa escondido */
+        display: none; 
+        
+        /* Centraliza o conteúdo */
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+
+    /* O container das duas colunas */
+    #resumo-container {
+        display: flex;
+        gap: 20px;
+        width: 100%;
+        max-width: 1200px; /* Limita a largura */
+    }
+
+    /* Estilo de cada coluna (Gabarito e Placar) */
+    .resumo-coluna {
+        flex: 1; /* Faz as colunas terem 50% de largura */
+        background: rgba(0, 0, 0, 0.5); /* Fundo (como os .box) */
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 165, 0, 0.5); /* Borda laranja */
+        
+        /* Controle de altura caso a lista seja longa */
+        max-height: 80vh; 
+        overflow-y: auto;
+    }
+
+    /* O ESTILO CIANO "ILUMINADO" QUE VOCÊ PEDIU */
+    .titulo-ciano {
+        font-family: Arial, sans-serif; /* Fonte limpa para o título */
+        font-size: 1.8rem;
+        color: #00FFFF; /* Ciano puro */
+        
+        /* Efeito "iluminado" (glow) */
+        text-shadow: 0 0 4px #00FFFF, 
+                     0 0 8px #00FFFF, 
+                     0 0 12px rgba(0, 255, 255, 0.7);
+                     
+        margin-bottom: 15px;
+        border-bottom: 2px solid #00FFFF; /* Linha ciano */
+        padding-bottom: 5px;
+    }
+
+    /* Estilo das listas (similar ao que já existe) */
+    .resumo-coluna ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .resumo-coluna li {
+        background: rgba(0, 0, 0, 0.5); 
+        margin: 8px 0; 
+        padding: 10px 15px; 
+        border-radius: 5px; 
+        border: 1px solid rgba(255, 165, 0, 0.3);
+        font-size: 1.1rem;
+        color: #fff; /* Texto branco normal para o placar */
+    }
+
+    /* Destaque especial para o gabarito */
+    #resumo-lista-gabarito li {
+        color: #00FFFF; /* Texto ciano */
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
 
-  <h1>Monitoramento em Tempo Real - Jogo INDO</h1>
+  <h1>Monitoramento em Tempo Real - Jogo INDO</h1>
 
-    <div id="container">
+    <div id="container">
 
     <div class="box" id="status-geral">
         <h2>Status do Jogo</h2>
         <p><strong id="status-jogo">Aguardando início...</strong></p>
     </div>
 
-    <div class="box" id="rodada-atual">
-      <h2>Rodada Atual</h2>
-      <p><strong>Número:</strong> <span id="numero-rodada">0</span></p>
-      <p><strong>Tema:</strong> <span id="tema-rodada">Aguardando...</span></p>
-      <p><strong>Jogador da Vez:</strong> <span id="jogador-da-vez">Ninguém</span></p>
-      <p><strong>Tempo Restante:</strong> <span id="cronometro">--:--</span></p>
-    </div>
+    <div class="box" id="rodada-atual">
+      <h2>Rodada Atual</h2>
+      <p><strong>Número:</strong> <span id="numero-rodada">0</span></p>
+      <p><strong>Tema:</strong> <span id="tema-rodada">Aguardando...</span></p>
+      <p><strong>Jogador da Vez:</strong> <span id="jogador-da-vez">Ninguém</span></p>
+      <p><strong>Tempo Restante:</strong> <span id="cronometro">--:--</span></p>
+    </div>
 
-    <div class="box" id="pontuacao">
-      <h2>Pontuação</h2>
-      <ul id="placar">
+    <div class="box" id="pontuacao">
+      <h2>Pontuação</h2>
+      <ul id="placar">
           </ul>
-    </div>
+    </div>
 
-    <div class="box" id="status-jogadores">
-      <h2>Jogadores Conectados</h2>
-      <ul id="lista-jogadores">
+    <div class="box" id="status-jogadores">
+      <h2>Jogadores Conectados</h2>
+      <ul id="lista-jogadores">
           </ul>
-    </div>
+    </div>
 
-    <div class="box" id="dicas">
-      <h2>Dicas da Rodada</h2>
-      <ul id="lista-dicas">
+    <div class="box" id="dicas">
+      <h2>Dicas da Rodada</h2>
+      <ul id="lista-dicas">
           </ul>
-    </div>
+    </div>
 
     <div class="box" id="log-eventos">
       <h2>Log de Eventos</h2>
       <ul id="lista-log">
           </ul>
     </div>
-  </div>
+  </div>
 
-  <script>
+  <script>
     // Conecta ao servidor (mesmo endereço do jogo)
-    const socket = io();
+    const socket = io();
 
     // Seletores (buscando uma vez para melhor performance)
     const elListaJogadores = document.getElementById("lista-jogadores");
@@ -156,44 +247,54 @@
     const elCronometro = document.getElementById("cronometro");
     const elListaLog = document.getElementById("lista-log");
 
+    // **** NOSSOS NOVOS SELETORES (DO RESUMO) ****
+    const elResumoOverlay = document.getElementById("monitor-resumo-overlay");
+    const elResumoGabarito = document.getElementById("resumo-lista-gabarito");
+    const elResumoPlacar = document.getElementById("resumo-lista-placar");
+
     // --- Listeners do Socket ---
 
     // CORREÇÃO 1: (j.nome -> j.name)
-    socket.on("atualiza-jogadores", (jogadores) => {
-      elListaJogadores.innerHTML = "";
-      jogadores.forEach(j => {
-        const li = document.createElement("li");
+    socket.on("atualiza-jogadores", (jogadores) => {
+      elListaJogadores.innerHTML = "";
+      jogadores.forEach(j => {
+        const li = document.createElement("li");
         // Ex: "Duzão (Equipe 1) - Conectado"
-        li.textContent = `${j.name} (Equipe ${j.equipe}) ${j.conectado ? "- Conectado" : "- Offline"}`;
-        elListaJogadores.appendChild(li);
-      });
-    });
+        li.textContent = `${j.name} (Equipe ${j.equipe}) ${j.conectado ? "- Conectado" : "- Offline"}`;
+        elListaJogadores.appendChild(li);
+      });
+    }); // <-- Correção de sintaxe (fechamento)
 
-    socket.on("atualiza-rodada", (rodada) => {
-      elNumeroRodada.textContent = rodada.numero;
-      elTemaRodada.textContent = rodada.tema;
+    socket.on("atualiza-rodada", (rodada) => {
+      elNumeroRodada.textContent = rodada.numero;
+      elTemaRodada.textContent = rodada.tema;
       // Limpa as dicas da rodada anterior
       elListaDicas.innerHTML = ""; 
-    });
+
+      // **** NOSSA MUDANÇA (Esconder o resumo) ****
+      if (elResumoOverlay) { 
+          elResumoOverlay.style.display = "none";
+      }
+    }); // <-- Correção de sintaxe (fechamento)
 
     // CORREÇÃO 2: (for...in -> forEach)
-    socket.on("atualiza-pontuacao", (pontos) => {
-      elPlacar.innerHTML = "";
+    socket.on("atualiza-pontuacao", (pontos) => {
+      elPlacar.innerHTML = "";
       // O servidor envia um array de objetos, ex: [{equipe: 'Gege', pontos: 10}]
       pontos.forEach(p => {
         const li = document.createElement("li");
         li.textContent = `${p.equipe}: ${p.pontos} pts`;
         elPlacar.appendChild(li);
       });
-    });
+    });
 
     // Modificado para 'nova-dica' para adicionar uma por vez
-    socket.on("nova-dica", (dica) => {
-      const li = document.createElement("li");
-      li.textContent = `${dica.jogador}: ${dica.texto}`;
+    socket.on("nova-dica", (dica) => {
+      const li = document.createElement("li");
+      li.textContent = `${dica.jogador}: ${dica.texto}`;
       // Adiciona a dica no topo da lista
-      elListaDicas.prepend(li);
-    });
+      elListaDicas.prepend(li);
+    });
 
     // --- Novos Listeners Essenciais ---
 
@@ -216,9 +317,44 @@
         elListaLog.prepend(li); 
     });
 
-  </script>
+    // **** NOSSO NOVO LISTENER (Mostrar e preencher o resumo) ****
+    socket.on("exibir-resumo-rodada", (dados) => {
+        // dados = { gabarito: [...], placar: [...] }
 
-    <div id="monitor-resumo-overlay">
+        // 1. Preencher Gabarito
+        elResumoGabarito.innerHTML = "";
+        dados.gabarito.forEach(item => {
+            const li = document.createElement("li");
+            // Esperando dados como: { numero: 48, texto: 'Utilizar água...' }
+            if (item.numero && item.texto) {
+                 li.textContent = `(${item.numero}) ${item.texto}`;
+            } else {
+                 li.textContent = item; // Fallback para string simples
+            }
+            elResumoGabarito.appendChild(li);
+        });
+
+        // 2. Preencher Placar
+        elResumoPlacar.innerHTML = "";
+        dados.placar.forEach(p => {
+            const li = document.createElement("li");
+            // Esperando dados como: { texto: 'Du — +30 (na rodada)' }
+            if (p.texto) {
+                li.textContent = p.texto;
+            } else {
+                // Fallback para o formato antigo (se p.texto não vier)
+                li.textContent = `${p.equipe}: ${p.pontos} pts`;
+            }
+            elResumoPlacar.appendChild(li);
+        });
+        
+        // 3. Exibir o Overlay (IMPORTANTE: usar 'flex')
+        elResumoOverlay.style.display = "flex"; 
+    });
+
+  </script>
+
+  <div id="monitor-resumo-overlay">
     <div id="resumo-container">
         
         <div class="resumo-coluna">
@@ -235,6 +371,6 @@
 
     </div>
 </div>
+
 </body>
 </html>
-
