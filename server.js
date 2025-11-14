@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- NOVAS VARIÁVEIS DO CRONÔMETRO ---
-const TIP_TIME_LIMIT = 60; // Nosso tempo em segundos
+const TIP_TIME_LIMIT = 120; // Nosso tempo em segundos
 let timerInterval = null; // Variável para controlar o timer
 // ------------------------------------
 
@@ -468,3 +468,4 @@ server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
   broadcastMonitor('Servidor Iniciado', 'Servidor online e aguardando conexões.');
 });
+
