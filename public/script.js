@@ -72,7 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
         playerList.sort((a, b) => b.score - a.score).forEach((player, index) => {
             const div = document.createElement('div');
             div.classList.add('player-item');
-            div.innerHTML = `<span class="player-rank">${index + 1}º</span><br>                             <span class="player-name">${player.name}</span><br>                             <span class="player-score">${player.score} pts</span>`;
+            div.innerHTML = `<span class="player-rank">${index + 1}º</span><br>
+                             <span class="player-name">${player.name}</span><br>
+                             <span class="player-score">${player.score} pts</span>`;
             listaJogadoresDiv.appendChild(div);
         });
         const canStart = playerList.length >= 2;
@@ -202,6 +204,17 @@ document.addEventListener('DOMContentLoaded', () => {
         socket.emit('requestNextTipper');
     });
 
+    // ================================================================
+    // AQUI ESTÁ A CORREÇÃO DO BUG DO NÚMERO REPETIDO (Parte 1)
+    // ================================================================
+    // O servidor vai mandar este evento com o nosso número.
+    socket.on('receiveSecretNumber', (number) => {
+        currentSecretNumber = number;
+        if (numeroSecretoDisplay) {
+            numeroSecretoDisplay.textContent = currentSecretNumber;
+        }
+    });
+
     socket.on('nextTipper', (player) => {
         nomeJogadorVezSpan.textContent = player.name;
         nomeJogadorDicaSpan.textContent = player.name;
@@ -214,15 +227,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // ▲▲▲ FIM DA CORREÇÃO ▲▲▲
 
         if (isMyTurn) {
-            currentSecretNumber = Math.floor(Math.random() * 100) + 1;
-            numeroSecretoDisplay.textContent = currentSecretNumber;
-            // numeroSecretoDisplay.classList.remove('hidden'); // (Linha removida, o toggle acima já faz isso)
+            // REMOVIDO: A linha do Math.random() foi apagada.
+            // O listener 'receiveSecretNumber' já definiu o 'currentSecretNumber'
+            
+            // Apenas garantimos que o display mostre o número correto
+            if (numeroSecretoDisplay && currentSecretNumber) {
+                 numeroSecretoDisplay.textContent = currentSecretNumber;
+            }
+
             inputDica.disabled = false;
             btnEnviarDica.disabled = false;
             inputDica.value = '';
             inputDica.focus();
         }
     });
+    // ================================================================
+    // FIM DA CORREÇÃO DO BUG
+    // ================================================================
+
 
     socket.on('startSortingPhase', (tipsToGuess) => {
         espacoDicas.classList.add('hidden');
