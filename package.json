@@ -1,5 +1,5 @@
 {
-  "name": "jogo-indo",
+  "name": "level-up",
   "version": "1.0.0",
   "description": "Jogo de detetive online para meus alunos.",
   "main": "server.js",
