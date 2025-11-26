@@ -12,7 +12,7 @@ const io = new Server(server, {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.use(express.static(path.join(__dirname, 'public')));
 
 // --- NOVAS VARIÁVEIS DO CRONÔMETRO ---
@@ -496,5 +496,6 @@ server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
   broadcastMonitor('Servidor Iniciado', 'Servidor online e aguardando conexões.');
 });
+
 
 
