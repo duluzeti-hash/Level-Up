@@ -7,9 +7,9 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["https://jogo-indo.fly.dev", "http://localhost:3000"],
-    methods: ["GET", "POST"]
-  }
+  origin: ["https://level-up.fly.dev", "http://localhost:8080"], // CORREÇÃO COMPLETA
+  methods: ["GET", "POST"]
+}
 });
 
 const PORT = process.env.PORT || 8080;
@@ -496,6 +496,7 @@ server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
   broadcastMonitor('Servidor Iniciado', 'Servidor online e aguardando conexões.');
 });
+
 
 
 
