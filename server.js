@@ -41,6 +41,13 @@ function formatTime(seconds) {
   const remainingSeconds = seconds % 60;
   return `${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`;
 }
+// Definindo o HOST para 0.0.0.0 (OBRIGATÓRIO no Fly.io)
+const HOST = '0.0.0.0';
+
+// Inicia o servidor HTTP/Socket.io
+server.listen(PORT, HOST, () => {
+    console.log(`Server is running on http://${HOST}:${PORT}`);
+});
 // -----------------------------------------
 
 const temas = [
@@ -495,4 +502,5 @@ server.listen(PORT, () => {
   console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
   console.log(`[CONFIG] ALLOWED_ORIGINS=${allowedOriginsEnv}`);
   broadcastMonitor('Servidor Iniciado', 'Servidor online e aguardando conexões.');
+
 });
