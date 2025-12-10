@@ -487,7 +487,7 @@ const temas = [
   { "categoria": "CLIENTE E MERCADO", "tema": "Qual a forma estratégica de gerenciar reclamações de clientes?" },
   { "categoria": "PRODUTIVIDADE", "tema": "Como otimizar o tempo de carga e descarga (tempo de pátio/gate)?" },
   { "categoria": "PRODUTIVIDADE", "tema": "Como reduzir a ociosidade de veículos e operadores?" },
-  { "categoria": "PRODUTIVIDADE", "tema": "Quais métodos 'Lean Logistics' aplicar na operação?"" },
+  { "categoria": "PRODUTIVIDADE", "tema": "Quais métodos 'Lean Logistics' aplicar na operação?" },
   { "categoria": "LIDERANÇA", "tema": "Como o líder deve inspirar as equipes para o alto desempenho?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como melhorar a comunicação entre setores (Ex: Comercial x Operação)?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como padronizar as instruções de serviço (IS) para motoristas?" },
@@ -495,3 +495,4 @@ const temas = [
   { "categoria": "COMUNICAÇÃO", "tema": "Como fortalecer a cultura de diálogo e transparência na empresa?" },
   { "categoria": "COMUNICAÇÃO", "tema": "Como evitar retrabalho causado por falhas de comunicação?" }
 ];
+
