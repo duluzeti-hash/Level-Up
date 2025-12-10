@@ -498,10 +498,5 @@ io.on('connection', (socket) => {
   });
 });
 
-server.listen(PORT, () => {
-  console.log(`[SERVIDOR] Rodando na porta ${PORT}`);
-  console.log(`[CONFIG] ALLOWED_ORIGINS=${allowedOriginsEnv}`);
-  broadcastMonitor('Servidor Iniciado', 'Servidor online e aguardando conexões.');
 
-});
 
