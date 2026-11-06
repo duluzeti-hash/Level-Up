@@ -191,7 +191,7 @@ io.on('connection', (socket) => {
     for (const player of players) {
         let num;
         do {
-            num = Math.floor(Math.random() * 100) + 1;
+            num = Math.floor(Math.random() * 10) + 1) * 10;
         } while (usedNumbers.has(num));
         usedNumbers.add(num);
         roundData.secretNumberMap[player.id] = num;
